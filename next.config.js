@@ -8,8 +8,6 @@ const nextConfig = {
     ],
   },
   reactStrictMode: true,
-  // Allow dev origins for preview
-  allowedDevOrigins: ['*.vusercontent.net'],
 };
 
 module.exports = nextConfig;
