@@ -168,7 +168,7 @@ export default function Navbar({ onMovieSelect }: NavbarProps) {
               <Wand2 className="w-5 h-5" />
               <span className="font-medium">AI Пошук з UA дубляжем</span>
             </button>
-            
+
             {CATEGORIES.map((cat) => {
               const Icon = cat.icon;
               return (
@@ -192,7 +192,6 @@ export default function Navbar({ onMovieSelect }: NavbarProps) {
             })}
           </div>
         )}
-        </div>
       </div>
 
       {/* AI Search Modal */}
