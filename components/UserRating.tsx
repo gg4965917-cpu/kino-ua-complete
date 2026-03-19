@@ -17,7 +17,7 @@ export default function UserRating({ movieId }: UserRatingProps) {
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
         Ваша оцінка
       </h3>
       <div className="flex items-center space-x-1">
@@ -31,10 +31,10 @@ export default function UserRating({ movieId }: UserRatingProps) {
             aria-label={`Оцінити ${star} зірок`}
           >
             <Star
-              className={`w-8 h-8 transition-colors duration-150 ${
+              className={`w-7 h-7 transition-colors duration-150 ${
                 star <= displayRating
-                  ? 'text-kino-yellow-400 fill-kino-yellow-400'
-                  : 'text-gray-600 group-hover:text-gray-400'
+                  ? 'text-yellow-400 fill-yellow-400'
+                  : 'text-gray-700 group-hover:text-gray-500'
               }`}
             />
           </button>
@@ -48,7 +48,7 @@ export default function UserRating({ movieId }: UserRatingProps) {
           </span>
         )}
         {!currentRating && (
-          <span className="ml-3 text-sm text-gray-500 italic">Оцініть фільм</span>
+          <span className="ml-3 text-sm text-gray-600 italic">Оцініть фільм</span>
         )}
       </div>
     </div>

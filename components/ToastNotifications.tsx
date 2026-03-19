@@ -49,7 +49,7 @@ function Toast({ id, message, type, onClose }: ToastProps) {
 
   return (
     <div
-      className={`flex items-center space-x-3 ${colors[type]} border backdrop-blur-lg px-4 py-3 rounded-lg shadow-2xl animate-slideInRight`}
+      className={`flex items-center space-x-3 ${colors[type]} border backdrop-blur-xl px-4 py-3 rounded-xl shadow-2xl animate-slideInRight`}
     >
       {icons[type]}
       <span className="flex-1 text-sm font-semibold">{message}</span>
