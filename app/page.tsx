@@ -17,6 +17,8 @@ import { MovieCardSkeleton } from '@/components/Skeleton';
 import ContinueWatching from '@/components/ContinueWatching';
 import UserRating from '@/components/UserRating';
 import RelatedMovies from '@/components/RelatedMovies';
+import VideoPlayer from '@/components/VideoPlayer';
+import Footer from '@/components/Footer';
 import { getDubbingByTmdbId, searchAndAddDubbing, Dubbing } from '@/lib/dubbing';
 
 const CATEGORIES = [
@@ -299,7 +301,7 @@ export default function HomePage() {
                     onChange={e => setSearchQuery(e.target.value)}
                     onFocus={() => setIsSearchFocused(true)}
                     onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                    placeholder="Пошук фільмів..."
+                    placeholder="П��шук фільмів..."
                     className="bg-transparent outline-none text-white placeholder-gray-400 w-full text-sm"
                   />
                   {searchQuery && (
@@ -666,38 +668,34 @@ export default function HomePage() {
               <div className="p-6 md:p-8 space-y-6">
                 {isPlaying ? (
                   <div className="space-y-4">
-                    <div className="aspect-video bg-black rounded-xl overflow-hidden border border-gray-800 relative">
-                      {m.tmdbId ? (
-                        <div className="w-full h-full relative">
-                          <iframe
-                            src={`https://vidsrc.xyz/embed/movie/${m.tmdbId}`}
-                            className="w-full h-full"
-                            allowFullScreen
-                            allow="autoplay; fullscreen; picture-in-picture"
-                            referrerPolicy="origin"
-                            title={m.title}
-                          />
-                          <div className="absolute inset-0 pointer-events-none opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center bg-black/50">
-                            <p className="text-xs text-gray-400">Якщо відео не відображається, спробуйте F5 або відкрийте в іншому браузері</p>
+                    {m.tmdbId ? (
+                      <VideoPlayer 
+                        tmdbId={m.tmdbId} 
+                        title={m.title} 
+                        onClose={() => setIsPlaying(false)}
+                      />
+                    ) : (
+                      <div className="aspect-video bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border border-gray-700 flex items-center justify-center">
+                        <div className="text-center space-y-4 p-8">
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-kino-yellow-400/20 rounded-full blur-xl animate-pulse" />
+                            <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-full border border-gray-700">
+                              <Film className="w-12 h-12 text-kino-yellow-400" />
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="text-center space-y-3">
-                            <Play className="w-16 h-16 text-kino-yellow-400 mx-auto animate-pulse" />
-                            <p className="text-gray-400">Відео недоступне для цього фільму</p>
+                          <div>
+                            <p className="text-lg font-semibold text-white">Відео недоступне</p>
+                            <p className="text-sm text-gray-400 mt-1">Фільм не має TMDB ID для відтворення</p>
                           </div>
+                          <button 
+                            onClick={() => setIsPlaying(false)}
+                            className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-sm transition-colors"
+                          >
+                            Закрити
+                          </button>
                         </div>
-                      )}
-                    </div>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                      <p className="text-sm text-gray-400 truncate">Перегляд: {m.title}</p>
-                      <button onClick={() => setIsPlaying(false)}
-                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 w-full sm:w-auto justify-center">
-                        <X className="w-4 h-4" />
-                        Закрити плеєр
-                      </button>
-                    </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <button onClick={() => setIsPlaying(true)}
@@ -842,6 +840,9 @@ export default function HomePage() {
           </div>
         );
       })()}
+
+      {/* Footer */}
+      <Footer />
 
       {scrolled && (
         <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}

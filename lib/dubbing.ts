@@ -17,6 +17,7 @@ export interface Dubbing {
 export async function getDubbingByTmdbId(tmdbId: number): Promise<Dubbing | null> {
   try {
     const supabase = createClient();
+    if (!supabase) return null;
     
     const { data, error } = await supabase
       .from('dubbing')
@@ -35,6 +36,7 @@ export async function getDubbingByTmdbId(tmdbId: number): Promise<Dubbing | null
 export async function getAllDubbings(): Promise<Dubbing[]> {
   try {
     const supabase = createClient();
+    if (!supabase) return [];
     
     const { data, error } = await supabase
       .from('dubbing')
@@ -52,6 +54,7 @@ export async function getAllDubbings(): Promise<Dubbing[]> {
 export async function addDubbing(dubbing: Omit<Dubbing, 'id' | 'release_date' | 'created_at'>): Promise<Dubbing | null> {
   try {
     const supabase = createClient();
+    if (!supabase) return null;
     
     const { data, error } = await supabase
       .from('dubbing')
