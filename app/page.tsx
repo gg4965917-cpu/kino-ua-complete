@@ -5,7 +5,7 @@ import {
   Search, Film, Star, Play, Info, ChevronLeft, ChevronRight,
   TrendingUp, X, Heart, Filter, SlidersHorizontal, Clock,
   Calendar, Volume2, VolumeX, Share2, ChevronDown, Menu,
-  Sparkles, CheckCircle, Settings, RefreshCw, Tv,
+  Sparkles, CheckCircle, RefreshCw, Tv,
 } from 'lucide-react';
 import { useMovieStore } from '@/lib/store';
 import {
@@ -17,6 +17,7 @@ import { MovieCardSkeleton } from '@/components/Skeleton';
 import ContinueWatching from '@/components/ContinueWatching';
 import UserRating from '@/components/UserRating';
 import RelatedMovies from '@/components/RelatedMovies';
+import { getDubbingByTmdbId, Dubbing } from '@/lib/dubbing';
 
 const CATEGORIES = [
   { name: 'Головна',    icon: Film      },
@@ -55,9 +56,9 @@ export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
 
-  const [showSettings, setShowSettings] = useState(false);
-  const [tmpKey, setTmpKey] = useState('');
+
   const [movieDetailsCache, setMovieDetailsCache] = useState<Record<number, Partial<Movie>>>({});
+  const [dubbingCache, setDubbingCache] = useState<Record<number, Dubbing | null>>({});
 
   const movies = allMovies.length > 0 ? allMovies : staticMovies;
 
@@ -181,10 +182,17 @@ export default function HomePage() {
     ).slice(0, 5);
   }, [searchQuery, movies]);
 
+  const loadDubbing = useCallback(async (tmdbId: number) => {
+    if (dubbingCache[tmdbId] !== undefined) return;
+    const info = await getDubbingByTmdbId(tmdbId);
+    setDubbingCache(prev => ({ ...prev, [tmdbId]: info }));
+  }, [dubbingCache]);
+
   const openMovie = (movie: Movie) => {
     setSelectedMovie(movie);
     addToHistory(movie.id);
     loadMovieDetails(movie);
+    if (movie.tmdbId) loadDubbing(movie.tmdbId);
   };
   const playMovie = (movie: Movie) => {
     setSelectedMovie(movie);
@@ -313,14 +321,7 @@ export default function HomePage() {
                 )}
               </div>
 
-              <button onClick={() => { setShowSettings(true); setTmpKey(tmdbKey); }}
-                className={`p-2 rounded-lg border transition-all ${
-                  tmdbKey ? 'bg-kino-yellow-400/10 border-kino-yellow-400/30 text-kino-yellow-400'
-                           : 'bg-white/10 border-white/20 text-gray-400 hover:bg-white/20'
-                }`}
-                title={tmdbKey ? 'TMDB підключено' : 'Підключити TMDB'}>
-                <Settings className="w-4 h-4" />
-              </button>
+
 
               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="lg:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20">
@@ -351,70 +352,7 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* TMDB Settings Modal */}
-      {showSettings && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-kino-dark-800 rounded-2xl max-w-md w-full border border-gray-800 p-6 shadow-2xl animate-scaleIn">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">Підключити TMDB</h3>
-              <button onClick={() => setShowSettings(false)} className="text-gray-400 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-4 text-sm text-gray-300 space-y-2">
-              <p className="text-blue-400 font-semibold">Як отримати безкоштовний API ключ:</p>
-              <ol className="space-y-1 text-xs">
-                <li>1. Зайдіть на themoviedb.org - зареєструйтесь</li>
-                <li>2. Профіль - Settings - API - Create</li>
-                <li>3. Скопіюйте API Key (v3 auth)</li>
-              </ol>
-            </div>
-
-            <label className="block text-xs text-gray-400 mb-2 uppercase tracking-wider">TMDB API Key</label>
-            <input
-              type="text"
-              value={tmpKey}
-              onChange={e => setTmpKey(e.target.value)}
-              placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-              className="w-full bg-black border border-gray-700 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-kino-yellow-400 mb-4"
-            />
-
-            <div className="flex gap-3">
-              <button
-                onClick={async () => {
-                  if (!tmpKey.trim()) return;
-                  try {
-                    const res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${tmpKey.trim()}&language=uk-UA`);
-                    if (!res.ok) throw new Error('Невірний ключ');
-                    setTmdbKey(tmpKey.trim());
-                    setShowSettings(false);
-                    addNotification('TMDB підключено! Завантажуємо фільми...', 'success');
-                    loadTMDB(activeCategory, tmpKey.trim());
-                  } catch {
-                    addNotification('Невірний TMDB API ключ', 'error');
-                  }
-                }}
-                className="flex-1 bg-kino-yellow-400 text-black py-3 rounded-lg font-bold hover:bg-kino-yellow-500 transition-colors">
-                Зберегти та підключити
-              </button>
-              {tmdbKey && (
-                <button
-                  onClick={() => { setTmdbKey(''); setAllMovies([]); setShowSettings(false); addNotification('TMDB відключено', 'info'); }}
-                  className="px-4 py-3 bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-sm">
-                  Відключити
-                </button>
-              )}
-            </div>
-
-            {!tmdbKey && (
-              <p className="text-xs text-gray-500 mt-3 text-center">
-                Без ключа показуються вбудовані українські фільми
-              </p>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Hero */}
       {currentHero && (
@@ -714,14 +652,19 @@ export default function HomePage() {
                   <div className="space-y-4">
                     <div className="aspect-video bg-black rounded-xl overflow-hidden border border-gray-800 relative">
                       {m.tmdbId ? (
-                        <iframe
-                          src={`https://vidsrc.xyz/embed/movie/${m.tmdbId}`}
-                          className="w-full h-full"
-                          allowFullScreen
-                          allow="autoplay; fullscreen; picture-in-picture"
-                          referrerPolicy="origin"
-                          title={m.title}
-                        />
+                        <div className="w-full h-full relative">
+                          <iframe
+                            src={`https://vidsrc.xyz/embed/movie/${m.tmdbId}`}
+                            className="w-full h-full"
+                            allowFullScreen
+                            allow="autoplay; fullscreen; picture-in-picture"
+                            referrerPolicy="origin"
+                            title={m.title}
+                          />
+                          <div className="absolute inset-0 pointer-events-none opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center bg-black/50">
+                            <p className="text-xs text-gray-400">Якщо відео не відображається, спробуйте F5 або відкрийте в іншому браузері</p>
+                          </div>
+                        </div>
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <div className="text-center space-y-3">
@@ -731,10 +674,10 @@ export default function HomePage() {
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-gray-400">Перегляд: {m.title}</p>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <p className="text-sm text-gray-400 truncate">Перегляд: {m.title}</p>
                       <button onClick={() => setIsPlaying(false)}
-                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2">
+                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 w-full sm:w-auto justify-center">
                         <X className="w-4 h-4" />
                         Закрити плеєр
                       </button>
@@ -773,9 +716,10 @@ export default function HomePage() {
                       <Clock className="w-4 h-4" />{m.duration}
                     </div>
                   )}
-                  {m.hasVoiceover && (
+                  {(m.hasVoiceover || (m.tmdbId && dubbingCache[m.tmdbId])) && (
                     <div className="flex items-center gap-2 bg-blue-500/20 border border-blue-500/30 px-3 py-1.5 rounded-lg text-blue-400">
-                      <Volume2 className="w-4 h-4" />UA озвучка
+                      <Volume2 className="w-4 h-4" />
+                      {dubbingCache[m.tmdbId || 0]?.studio || 'UA озвучка'}
                     </div>
                   )}
                 </div>
@@ -817,6 +761,38 @@ export default function HomePage() {
                     )}
                   </div>
                 )}
+
+                {m.tmdbId && dubbingCache[m.tmdbId] && (() => {
+                  const dubbing = dubbingCache[m.tmdbId!]!;
+                  return (
+                    <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-4">
+                      <h3 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <Volume2 className="w-4 h-4" />Український дубляж
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="text-gray-500">Студія:</span>
+                          <p className="text-white font-medium">{dubbing.studio}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Якість:</span>
+                          <p className="text-white font-medium">{dubbing.quality}</p>
+                        </div>
+                        {dubbing.voice_actors && (
+                          <div className="col-span-2">
+                            <span className="text-gray-500">Актори озвучки:</span>
+                            <p className="text-white font-medium">{dubbing.voice_actors}</p>
+                          </div>
+                        )}
+                        <div className="col-span-2 flex items-center gap-2">
+                          {dubbing.has_subtitles && (
+                            <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs">Субтитри</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 <div className="pt-2 border-t border-gray-800/50">
                   <UserRating movieId={m.id} />
