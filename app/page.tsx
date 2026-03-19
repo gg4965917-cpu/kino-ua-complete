@@ -762,34 +762,37 @@ export default function HomePage() {
                   </div>
                 )}
 
-                {m.tmdbId && dubbingCache[m.tmdbId] && (
-                  <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-4">
-                    <h3 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                      <Volume2 className="w-4 h-4" />Український дубляж
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="text-gray-500">Студія:</span>
-                        <p className="text-white font-medium">{dubbingCache[m.tmdbId].studio}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Якість:</span>
-                        <p className="text-white font-medium">{dubbingCache[m.tmdbId].quality}</p>
-                      </div>
-                      {dubbingCache[m.tmdbId].voice_actors && (
-                        <div className="col-span-2">
-                          <span className="text-gray-500">Актори озвучки:</span>
-                          <p className="text-white font-medium">{dubbingCache[m.tmdbId].voice_actors}</p>
+                {m.tmdbId && dubbingCache[m.tmdbId] && (() => {
+                  const dubbing = dubbingCache[m.tmdbId!]!;
+                  return (
+                    <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-4">
+                      <h3 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <Volume2 className="w-4 h-4" />Український дубляж
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="text-gray-500">Студія:</span>
+                          <p className="text-white font-medium">{dubbing.studio}</p>
                         </div>
-                      )}
-                      <div className="col-span-2 flex items-center gap-2">
-                        {dubbingCache[m.tmdbId].has_subtitles && (
-                          <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs">Субтитри</span>
+                        <div>
+                          <span className="text-gray-500">Якість:</span>
+                          <p className="text-white font-medium">{dubbing.quality}</p>
+                        </div>
+                        {dubbing.voice_actors && (
+                          <div className="col-span-2">
+                            <span className="text-gray-500">Актори озвучки:</span>
+                            <p className="text-white font-medium">{dubbing.voice_actors}</p>
+                          </div>
                         )}
+                        <div className="col-span-2 flex items-center gap-2">
+                          {dubbing.has_subtitles && (
+                            <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs">Субтитри</span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 <div className="pt-2 border-t border-gray-800/50">
                   <UserRating movieId={m.id} />
