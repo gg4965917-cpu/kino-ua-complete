@@ -23,6 +23,11 @@ export interface Movie {
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMG  = 'https://image.tmdb.org/t/p';
 
+// Get API key from environment - use public key for client-side requests
+const getTMDBKey = () => {
+  return process.env.NEXT_PUBLIC_TMDB_API_KEY || process.env.TMDB_API_KEY || '';
+};
+
 const GENRE_MAP: Record<number, string> = {
   28: 'Бойовик', 12: 'Пригоди', 16: 'Анімація', 35: 'Комедія',
   80: 'Кримінал', 99: 'Документальний', 18: 'Драма', 10751: 'Сімейний',
@@ -78,6 +83,9 @@ async function tmdbGet(path: string, apiKey: string, timeout = 8000) {
     const sep = path.includes('?') ? '&' : '?';
     const res = await fetch(`${TMDB_BASE}${path}${sep}api_key=${apiKey}&language=uk-UA`, {
       signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+      }
     });
     
     if (!res.ok) {
@@ -90,10 +98,11 @@ async function tmdbGet(path: string, apiKey: string, timeout = 8000) {
   }
 }
 
-export async function fetchPopularTMDB(apiKey: string): Promise<Movie[]> {
-  if (!apiKey) return [];
+export async function fetchPopularTMDB(apiKey?: string): Promise<Movie[]> {
+  const key = apiKey || getTMDBKey();
+  if (!key) return [];
   try {
-    const data = await tmdbGet('/movie/popular?page=1', apiKey);
+    const data = await tmdbGet('/movie/popular?page=1', key);
     return (data.results || []).map(tmdbToMovie);
   } catch (error) {
     console.warn('Помилка завантаження популярних фільмів:', error);
@@ -101,10 +110,11 @@ export async function fetchPopularTMDB(apiKey: string): Promise<Movie[]> {
   }
 }
 
-export async function fetchTopRatedTMDB(apiKey: string): Promise<Movie[]> {
-  if (!apiKey) return [];
+export async function fetchTopRatedTMDB(apiKey?: string): Promise<Movie[]> {
+  const key = apiKey || getTMDBKey();
+  if (!key) return [];
   try {
-    const data = await tmdbGet('/movie/top_rated?page=1', apiKey);
+    const data = await tmdbGet('/movie/top_rated?page=1', key);
     return (data.results || []).map(tmdbToMovie);
   } catch (error) {
     console.warn('Помилка завантаження топ фільмів:', error);
@@ -112,10 +122,11 @@ export async function fetchTopRatedTMDB(apiKey: string): Promise<Movie[]> {
   }
 }
 
-export async function fetchNowPlayingTMDB(apiKey: string): Promise<Movie[]> {
-  if (!apiKey) return [];
+export async function fetchNowPlayingTMDB(apiKey?: string): Promise<Movie[]> {
+  const key = apiKey || getTMDBKey();
+  if (!key) return [];
   try {
-    const data = await tmdbGet('/movie/now_playing?page=1', apiKey);
+    const data = await tmdbGet('/movie/now_playing?page=1', key);
     return (data.results || []).map(tmdbToMovie);
   } catch (error) {
     console.warn('Помилка завантаження нових фільмів:', error);
@@ -123,10 +134,11 @@ export async function fetchNowPlayingTMDB(apiKey: string): Promise<Movie[]> {
   }
 }
 
-export async function searchTMDB(query: string, apiKey: string): Promise<Movie[]> {
-  if (!apiKey || !query.trim()) return [];
+export async function searchTMDB(query: string, apiKey?: string): Promise<Movie[]> {
+  const key = apiKey || getTMDBKey();
+  if (!key || !query.trim()) return [];
   try {
-    const data = await tmdbGet(`/search/movie?query=${encodeURIComponent(query)}&page=1`, apiKey);
+    const data = await tmdbGet(`/search/movie?query=${encodeURIComponent(query)}&page=1`, key);
     return (data.results || []).slice(0, 20).map(tmdbToMovie);
   } catch (error) {
     console.warn('Помилка пошуку:', error);
@@ -134,12 +146,13 @@ export async function searchTMDB(query: string, apiKey: string): Promise<Movie[]
   }
 }
 
-export async function fetchMovieDetails(tmdbId: number, apiKey: string): Promise<Partial<Movie>> {
-  if (!apiKey || !tmdbId) return {};
+export async function fetchMovieDetails(tmdbId: number, apiKey?: string): Promise<Partial<Movie>> {
+  const key = apiKey || getTMDBKey();
+  if (!key || !tmdbId) return {};
   try {
     const [details, credits] = await Promise.all([
-      tmdbGet(`/movie/${tmdbId}`, apiKey),
-      tmdbGet(`/movie/${tmdbId}/credits`, apiKey),
+      tmdbGet(`/movie/${tmdbId}`, key),
+      tmdbGet(`/movie/${tmdbId}/credits`, key),
     ]);
     return {
       duration: details.runtime ? `${details.runtime} хв` : '',

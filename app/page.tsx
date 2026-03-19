@@ -59,7 +59,11 @@ export default function HomePage() {
   // Load TMDB movies
   const loadTMDB = useCallback(
     async (category: string, key: string) => {
-      if (!key) return;
+      if (!key) {
+        console.log('[v0] TMDB key not available');
+        return;
+      }
+      console.log('[v0] Loading TMDB movies for category:', category);
       setIsFetchingMovies(true);
       try {
         let fetched: Movie[] = [];
@@ -72,8 +76,10 @@ export default function HomePage() {
         } else {
           fetched = await fetchPopularTMDB(key);
         }
+        console.log('[v0] Fetched movies:', fetched.length);
         if (fetched.length) setAllMovies(fetched);
       } catch (e: any) {
+        console.error('[v0] TMDB Error:', e);
         addNotification('TMDB: ' + e.message, 'error');
       } finally {
         setIsFetchingMovies(false);
