@@ -9,7 +9,6 @@ export default function ContinueWatching() {
 
   if (continueWatching.length === 0) return null;
 
-  // Sort by most recently watched
   const sorted = [...continueWatching].sort((a, b) => b.timestamp - a.timestamp);
 
   return (
@@ -43,24 +42,20 @@ export default function ContinueWatching() {
                   addToHistory(movie.id);
                 }}
               >
-                {/* Poster */}
                 <div
                   className="relative overflow-hidden rounded-xl aspect-[2/3] border border-gray-800 group-hover:border-kino-yellow-400/50 transition-all duration-300"
                   style={{ background: movie.poster || movie.backdrop }}
                 >
-                  {/* Play overlay */}
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <div className="bg-kino-yellow-400 rounded-full p-3 transform scale-90 group-hover:scale-100 transition-transform">
                       <Play className="w-6 h-6 text-black fill-black" />
                     </div>
                   </div>
 
-                  {/* Film icon placeholder */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <Film className="w-10 h-10 text-white/10" />
                   </div>
 
-                  {/* Progress bar */}
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
                     <div
                       className="h-full bg-kino-yellow-400 transition-all duration-300"
@@ -68,7 +63,6 @@ export default function ContinueWatching() {
                     />
                   </div>
 
-                  {/* Remove button */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -81,7 +75,6 @@ export default function ContinueWatching() {
                   </button>
                 </div>
 
-                {/* Info */}
                 <div className="mt-2 space-y-1">
                   <h4 className="font-semibold text-sm text-white line-clamp-1 group-hover:text-kino-yellow-400 transition-colors">
                     {movie.title}

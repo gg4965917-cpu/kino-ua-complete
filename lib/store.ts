@@ -43,11 +43,9 @@ interface MovieStore {
   updateProgress: (movieId: number, progress: number) => void;
   removeFromContinueWatching: (movieId: number) => void;
 
-  // TMDB
   tmdbKey: string;
   setTmdbKey: (key: string) => void;
 
-  // всі доступні фільми (статичні або з TMDB)
   allMovies: Movie[];
   setAllMovies: (movies: Movie[]) => void;
 
@@ -62,7 +60,7 @@ export const useMovieStore = create<MovieStore>()(
         const s = get();
         const has = s.favorites.includes(id);
         set({ favorites: has ? s.favorites.filter(f => f !== id) : [...s.favorites, id] });
-        s.addNotification(has ? 'Видалено з обраного' : 'Додано до обраного ❤️', has ? 'info' : 'success');
+        s.addNotification(has ? 'Видалено з обраного' : 'Додано до обраного', has ? 'info' : 'success');
       },
       isFavorite: (id) => get().favorites.includes(id),
 
@@ -74,7 +72,7 @@ export const useMovieStore = create<MovieStore>()(
       userRatings: {},
       setUserRating: (id, r) => {
         set(s => ({ userRatings: { ...s.userRatings, [id]: r } }));
-        get().addNotification(`Ваша оцінка: ${'⭐'.repeat(r)}`, 'success');
+        get().addNotification(`Ваша оцінка: ${'*'.repeat(r)}`, 'success');
       },
       getUserRating: (id) => get().userRatings[id] ?? null,
 
@@ -84,7 +82,6 @@ export const useMovieStore = create<MovieStore>()(
       sortBy: 'rating',
       setSortBy: (s) => set({ sortBy: s }),
 
-      // ⚠️ За замовчуванням ВИМКНЕНО — щоб вкладки працювали коректно
       voiceoverOnly: false,
       toggleVoiceoverOnly: () => set(s => ({ voiceoverOnly: !s.voiceoverOnly })),
 
@@ -128,7 +125,6 @@ export const useMovieStore = create<MovieStore>()(
       allMovies: [],
       setAllMovies: (movies) => set({ allMovies: movies }),
 
-      // ⚠️ resetFilters НЕ скидає voiceoverOnly — щоб не ламати вкладки
       resetFilters: () => set({
         selectedGenre: 'all',
         sortBy: 'rating',

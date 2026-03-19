@@ -25,8 +25,6 @@ module.exports = {
         'scaleIn': 'scaleIn 0.3s ease-out',
         'slideInLeft': 'slideInLeft 0.5s ease-out',
         'slideInRight': 'slideInRight 0.5s ease-out',
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'bounce-slow': 'bounce 2s infinite',
         'shimmer': 'shimmer 2s infinite',
       },
       keyframes: {

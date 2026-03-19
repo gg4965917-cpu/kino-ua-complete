@@ -1,7 +1,7 @@
 'use client';
 
 import { Film, Star, Play } from 'lucide-react';
-import { Movie } from '@/lib/store';
+import { Movie } from '@/lib/movies';
 import { moviesData } from '@/lib/movies';
 import { useMovieStore } from '@/lib/store';
 
@@ -15,7 +15,6 @@ export default function RelatedMovies({ movie }: RelatedMoviesProps) {
   const related = moviesData
     .filter(m => m.id !== movie.id && m.genre.some(g => movie.genre.includes(g)))
     .sort((a, b) => {
-      // More shared genres = higher priority
       const aShared = a.genre.filter(g => movie.genre.includes(g)).length;
       const bShared = b.genre.filter(g => movie.genre.includes(g)).length;
       return bShared - aShared || b.rating - a.rating;
