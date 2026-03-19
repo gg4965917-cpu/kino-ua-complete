@@ -1,23 +1,25 @@
 'use client';
 
-import { Film, Star, Play } from 'lucide-react';
+import { Film, Star, Play, Sparkles } from 'lucide-react';
 import { Movie, staticMovies } from '@/lib/movies';
 import { useMovieStore } from '@/lib/store';
 
 interface RelatedMoviesProps {
-  movie: Movie;
+  currentMovie: Movie;
+  movies: Movie[];
+  onSelectMovie: (movie: Movie) => void;
 }
 
-export default function RelatedMovies({ movie }: RelatedMoviesProps) {
-  const { setSelectedMovie, addToHistory, setIsPlaying, allMovies } = useMovieStore();
+export default function RelatedMovies({ currentMovie, movies, onSelectMovie }: RelatedMoviesProps) {
+  const { addToHistory, setIsPlaying } = useMovieStore();
 
-  const movies = allMovies.length > 0 ? allMovies : staticMovies;
+  const allMovies = movies.length > 0 ? movies : staticMovies;
   
-  const related = movies
-    .filter(m => m.id !== movie.id && m.genre.some(g => movie.genre.includes(g)))
+  const related = allMovies
+    .filter(m => m.id !== currentMovie.id && m.genre.some(g => currentMovie.genre.includes(g)))
     .sort((a, b) => {
-      const aShared = a.genre.filter(g => movie.genre.includes(g)).length;
-      const bShared = b.genre.filter(g => movie.genre.includes(g)).length;
+      const aShared = a.genre.filter(g => currentMovie.genre.includes(g)).length;
+      const bShared = b.genre.filter(g => currentMovie.genre.includes(g)).length;
       return bShared - aShared || b.rating - a.rating;
     })
     .slice(0, 4);
@@ -25,55 +27,67 @@ export default function RelatedMovies({ movie }: RelatedMoviesProps) {
   if (related.length === 0) return null;
 
   return (
-    <div>
-      <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
-        Схожі фільми
-      </h3>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="pt-6 border-t border-white/10">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="p-2 rounded-xl bg-ukr-blue-500/20 border border-ukr-blue-500/30">
+          <Sparkles className="w-4 h-4 text-ukr-blue-400" />
+        </div>
+        <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+          Схожі фільми
+        </h3>
+      </div>
+      
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {related.map(m => (
           <div
             key={m.id}
             className="group cursor-pointer"
             onClick={() => {
-              setSelectedMovie(m);
+              onSelectMovie(m);
               setIsPlaying(false);
               addToHistory(m.id);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           >
-            <div
-              className="relative overflow-hidden rounded-lg aspect-[2/3] mb-2 border border-gray-800 group-hover:border-kino-yellow-400/50 transition-all duration-300"
-              style={{ background: m.posterUrl ? 'transparent' : (m.poster || m.backdrop) }}
-            >
-              {/* Poster image */}
+            <div className="relative overflow-hidden rounded-xl aspect-[2/3] mb-3 bg-ukr-dark-700 border border-white/5 group-hover:border-ukr-blue-500/50 transition-all duration-300 card-premium">
+              {/* Poster Image */}
               {m.posterUrl ? (
                 <img 
                   src={m.posterUrl} 
                   alt={m.title} 
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Film className="w-8 h-8 text-white/10" />
+                <div 
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{ background: m.poster || m.backdrop }}
+                >
+                  <Film className="w-10 h-10 text-white/10" />
                 </div>
               )}
               
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <Play className="w-8 h-8 text-white" />
+              {/* Hover Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-ukr-dark-900 via-ukr-dark-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div className="bg-ukr-blue-500 rounded-full p-3 transform scale-75 group-hover:scale-100 transition-transform shadow-xl shadow-ukr-blue-500/50">
+                  <Play className="w-6 h-6 text-white fill-white" />
+                </div>
               </div>
               
-              {/* Rating badge */}
-              <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur-sm px-1.5 py-0.5 rounded flex items-center space-x-0.5">
-                <Star className="w-2.5 h-2.5 text-kino-yellow-400 fill-kino-yellow-400" />
+              {/* Rating Badge */}
+              <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1 border border-ukr-accent-gold/20">
+                <Star className="w-3 h-3 text-ukr-accent-gold fill-ukr-accent-gold" />
                 <span className="text-xs font-bold text-white">{m.rating}</span>
               </div>
             </div>
-            <p className="text-xs font-semibold text-white line-clamp-1 group-hover:text-kino-yellow-400 transition-colors">
-              {m.title}
-            </p>
-            <p className="text-xs text-gray-500">{m.year}</p>
+            
+            {/* Movie Info */}
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-white line-clamp-1 group-hover:text-ukr-blue-400 transition-colors">
+                {m.title}
+              </p>
+              <p className="text-xs text-gray-500">{m.year} - {m.genre[0]}</p>
+            </div>
           </div>
         ))}
       </div>
