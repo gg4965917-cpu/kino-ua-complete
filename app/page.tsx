@@ -88,7 +88,13 @@ export default function HomePage() {
 
   useEffect(() => {
     setTimeout(() => setIsLoading(false), 600);
-  }, []);
+    
+    // Auto-load TMDB API key from environment
+    const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+    if (apiKey && !tmdbKey) {
+      setTmdbKey(apiKey);
+    }
+  }, [tmdbKey, setTmdbKey]);
 
   useEffect(() => {
     if (tmdbKey) loadTMDB(activeCategory, tmdbKey);
