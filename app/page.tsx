@@ -269,7 +269,7 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
+        <Navbar onMovieSelect={openMovie} />
         <HeroSkeleton />
         <CarouselSkeleton />
         <CarouselSkeleton />
@@ -281,7 +281,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navbar />
+      <Navbar onMovieSelect={openMovie} />
 
       {/* Hero Section */}
       {!showGridView && (
