@@ -22,12 +22,21 @@ import Footer from '@/components/Footer';
 import { getDubbingByTmdbId, searchAndAddDubbing, Dubbing } from '@/lib/dubbing';
 
 const CATEGORIES = [
-  { name: 'Головна',    icon: Film      },
-  { name: 'Популярне', icon: TrendingUp },
-  { name: 'Топ',       icon: Star       },
-  { name: 'Новинки',   icon: Sparkles   },
-  { name: 'Мій список',icon: Heart      },
-  { name: 'Переглянуті',icon: Tv        },
+  { name: 'ГОЛОВНА',    icon: Film      },
+  { name: 'ФІЛЬМИ',     icon: TrendingUp },
+  { name: 'СЕРІАЛИ',    icon: Tv         },
+  { name: 'НОВИНКИ',    icon: Sparkles   },
+  { name: 'МІЙ СПИСОК', icon: Heart      },
+];
+
+// Quick filter tags
+const QUICK_FILTERS = [
+  { name: 'Комедії', genre: 'Комедія', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
+  { name: 'Драми', genre: 'Драма', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
+  { name: 'Бойовики', genre: 'Бойовик', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
+  { name: 'Фантастика', genre: 'Фантастика', color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' },
+  { name: 'Жахи', genre: 'Жахи', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+  { name: '4K', genre: null, color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
 ];
 
 export default function HomePage() {
@@ -235,14 +244,22 @@ export default function HomePage() {
 
   if (isLoading) return (
     <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="text-center space-y-4">
-        <div className="bg-gradient-to-br from-kino-yellow-400 to-kino-yellow-600 p-3 rounded-lg animate-pulse inline-block">
-          <Film className="w-8 h-8 text-black" strokeWidth={2.5} />
+      <div className="text-center space-y-6">
+        <div className="relative">
+          <div className="absolute inset-0 bg-ukr-blue/30 rounded-2xl blur-3xl animate-pulse" />
+          <div className="relative bg-gradient-to-br from-ukr-blue to-ukr-blue-dark p-5 rounded-2xl shadow-2xl">
+            <Film className="w-10 h-10 text-white" strokeWidth={2} />
+          </div>
         </div>
-        <div className="text-xl font-bold text-white animate-pulse">Завантаження KINO.UA...</div>
-        <div className="flex justify-center gap-2">
-          {[0,150,300].map(d => (
-            <div key={d} className="w-2 h-2 bg-kino-yellow-400 rounded-full animate-bounce" style={{animationDelay:`${d}ms`}} />
+        <div>
+          <div className="text-2xl font-bold text-white">
+            <span className="text-ukr-blue">UKR</span>FLIX
+          </div>
+          <p className="text-sm text-gray-500 mt-1">Завантаження...</p>
+        </div>
+        <div className="flex justify-center gap-1.5">
+          {[0,100,200].map(d => (
+            <div key={d} className="w-2 h-2 bg-ukr-blue rounded-full animate-bounce" style={{animationDelay:`${d}ms`}} />
           ))}
         </div>
       </div>
@@ -252,50 +269,51 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-black text-white">
 
-      {/* Navbar */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-black/95 backdrop-blur-lg shadow-2xl border-b border-gray-800'
-                 : 'bg-gradient-to-b from-black/90 to-transparent'
+      {/* Navbar - Glassmorphic Apple TV style */}
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+        scrolled ? 'glass-nav shadow-2xl'
+                 : 'bg-gradient-to-b from-black/80 via-black/40 to-transparent'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-2 cursor-pointer group"
-                onClick={() => { setActiveCategory('Головна'); resetFilters(); }}>
-                <div className="bg-gradient-to-br from-kino-yellow-400 to-kino-yellow-600 p-1.5 rounded-lg group-hover:scale-110 group-hover:rotate-6 transition-all shadow-lg shadow-kino-yellow-500/50">
-                  <Film className="w-5 h-5 text-black" strokeWidth={2.5} />
-                </div>
-                <span className="text-xl font-black font-bebas tracking-tight gradient-text">KINO.UA</span>
+            {/* Logo */}
+            <div className="flex items-center space-x-10">
+              <div className="flex items-center cursor-pointer group"
+                onClick={() => { setActiveCategory('ГОЛОВНА'); resetFilters(); }}>
+                <span className="text-2xl font-bold tracking-tight">
+                  <span className="text-ukr-blue">UKR</span>
+                  <span className="text-white">FLIX</span>
+                </span>
               </div>
 
-              <div className="hidden lg:flex items-center gap-5">
-                {CATEGORIES.map(cat => {
-                  const Icon = cat.icon;
-                  return (
-                    <button key={cat.name}
-                      onClick={() => { setActiveCategory(cat.name); resetFilters(); }}
-                      className={`flex items-center gap-1.5 text-sm font-semibold transition-all relative group ${
-                        activeCategory === cat.name ? 'text-kino-yellow-400' : 'text-gray-300 hover:text-kino-yellow-400'
-                      }`}>
-                      <Icon className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                      {cat.name}
-                      {activeCategory === cat.name && (
-                        <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-kino-yellow-400 rounded-full" />
-                      )}
-                    </button>
-                  );
-                })}
+              {/* Navigation items */}
+              <div className="hidden lg:flex items-center gap-8">
+                {CATEGORIES.map(cat => (
+                  <button key={cat.name}
+                    onClick={() => { setActiveCategory(cat.name); resetFilters(); }}
+                    className={`text-sm font-medium tracking-wide transition-all duration-300 relative py-2 ${
+                      activeCategory === cat.name 
+                        ? 'text-white' 
+                        : 'text-gray-400 hover:text-white'
+                    }`}>
+                    {cat.name}
+                    {activeCategory === cat.name && (
+                      <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-ukr-blue to-ukr-accent rounded-full" />
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="flex items-center gap-2 md:gap-3">
+            {/* Search & Menu */}
+            <div className="flex items-center gap-4">
               <div className="relative">
-                <div className={`flex items-center bg-white/10 backdrop-blur-md rounded-full px-3 py-1.5 transition-all border ${
+                <div className={`flex items-center rounded-xl px-4 py-2.5 transition-all duration-300 ${
                   isSearchFocused
-                    ? 'border-kino-yellow-400/50 w-52 md:w-80 shadow-lg shadow-kino-yellow-500/20 bg-white/20'
-                    : 'border-white/20 w-32 md:w-56'
+                    ? 'bg-white/15 w-64 md:w-96 shadow-lg shadow-ukr-blue/10 ring-2 ring-ukr-blue/50'
+                    : 'bg-white/8 w-40 md:w-64 hover:bg-white/12'
                 }`}>
-                  <Search className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+                  <Search className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
                   <input
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
@@ -312,26 +330,26 @@ export default function HomePage() {
                 </div>
 
                 {searchQuery && isSearchFocused && suggestions.length > 0 && (
-                  <div className="absolute top-full mt-2 w-full md:w-96 bg-gray-900/98 backdrop-blur-xl rounded-xl border border-gray-800 shadow-2xl overflow-hidden z-50 animate-fadeIn">
-                    <div className="p-3 text-xs text-gray-500 uppercase tracking-wider border-b border-gray-800 flex items-center gap-2">
-                      <Sparkles className="w-3 h-3" />Результати пошуку
+                  <div className="absolute top-full mt-3 w-full md:w-[420px] glass-heavy rounded-2xl shadow-2xl overflow-hidden z-50 animate-fadeIn">
+                    <div className="px-4 py-3 text-xs text-gray-400 uppercase tracking-wider border-b border-white/5 flex items-center gap-2">
+                      <Search className="w-3 h-3" />Результати пошуку
                     </div>
                     {suggestions.map(m => (
                       <div key={m.id} onClick={() => { openMovie(m); setSearchQuery(''); }}
-                        className="p-3 hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 group">
-                        <div className="w-10 h-14 rounded overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform"
+                        className="px-4 py-3 hover:bg-white/8 cursor-pointer flex items-center gap-4 group transition-colors">
+                        <div className="w-12 h-16 rounded-lg overflow-hidden flex-shrink-0 ring-1 ring-white/10"
                           style={{ background: m.posterUrl ? 'transparent' : m.poster }}>
                           {m.posterUrl
                             ? <img src={m.posterUrl} alt={m.title} className="w-full h-full object-cover" />
-                            : <Film className="w-6 h-6 text-white/20 m-auto mt-4" />}
+                            : <Film className="w-6 h-6 text-white/20 m-auto mt-5" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold truncate group-hover:text-kino-yellow-400 transition-colors">{m.title}</div>
-                          <div className="text-xs text-gray-400">{m.year} - {m.genre[0]}</div>
+                          <div className="text-sm font-semibold truncate group-hover:text-ukr-blue transition-colors">{m.title}</div>
+                          <div className="text-xs text-gray-500 mt-0.5">{m.year} - {m.genre[0]}</div>
                         </div>
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <Star className="w-3.5 h-3.5 text-kino-yellow-400 fill-kino-yellow-400" />
-                          <span className="text-sm font-bold text-kino-yellow-400">{m.rating}</span>
+                        <div className="flex items-center gap-1.5 flex-shrink-0 bg-kino-yellow-500/20 px-2 py-1 rounded-lg">
+                          <Star className="w-3 h-3 text-kino-yellow-400 fill-kino-yellow-400" />
+                          <span className="text-xs font-bold text-kino-yellow-400">{m.rating}</span>
                         </div>
                       </div>
                     ))}
@@ -342,26 +360,26 @@ export default function HomePage() {
 
 
               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20">
+                className="lg:hidden p-2.5 rounded-xl bg-white/8 hover:bg-white/15 transition-colors">
                 <Menu className="w-5 h-5" />
               </button>
             </div>
           </div>
 
           {mobileMenuOpen && (
-            <div className="lg:hidden mt-4 pb-4 space-y-2 border-t border-gray-800 pt-4 animate-fadeIn">
+            <div className="lg:hidden mt-4 pb-4 space-y-1 border-t border-white/5 pt-4 animate-fadeIn">
               {CATEGORIES.map(cat => {
                 const Icon = cat.icon;
                 return (
                   <button key={cat.name}
                     onClick={() => { setActiveCategory(cat.name); setMobileMenuOpen(false); resetFilters(); }}
-                    className={`flex items-center gap-2 w-full p-3 rounded-lg transition-all ${
+                    className={`flex items-center gap-3 w-full p-3 rounded-xl transition-all ${
                       activeCategory === cat.name
-                        ? 'bg-kino-yellow-400/20 text-kino-yellow-400 border border-kino-yellow-400/30'
-                        : 'text-gray-300 hover:bg-white/10 border border-transparent'
+                        ? 'bg-ukr-blue/20 text-ukr-blue'
+                        : 'text-gray-300 hover:bg-white/8'
                     }`}>
                     <Icon className="w-5 h-5" />
-                    <span className="font-semibold">{cat.name}</span>
+                    <span className="font-medium">{cat.name}</span>
                   </button>
                 );
               })}
@@ -372,69 +390,94 @@ export default function HomePage() {
 
 
 
-      {/* Hero */}
+      {/* Hero - Cinematic Apple TV Style */}
       {currentHero && (
-        <div className="relative h-screen overflow-hidden">
+        <div className="relative h-[100vh] overflow-hidden">
+          {/* Background Image with Cinematic Gradients */}
           <div className="absolute inset-0 transition-all duration-1000"
             style={{ background: currentHero.backdropUrl ? 'none' : currentHero.backdrop }}>
             {currentHero.backdropUrl && (
-              <img src={currentHero.backdropUrl} alt="" className="w-full h-full object-cover" />
+              <img src={currentHero.backdropUrl} alt="" className="w-full h-full object-cover scale-105" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/40" />
+            {/* Cinematic gradient overlays */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black to-transparent" />
           </div>
 
-          <div className="relative h-full flex items-center">
-            <div className="max-w-7xl mx-auto px-4 md:px-6 w-full">
-              <div className="max-w-2xl space-y-4 md:space-y-6 animate-fadeInUp">
+          {/* Hero Content */}
+          <div className="relative h-full flex items-end pb-32 md:pb-40">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 w-full">
+              <div className="max-w-3xl space-y-5 animate-fadeInUp">
+                {/* Badges */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="bg-kino-yellow-500/20 border border-kino-yellow-500/30 text-kino-yellow-400 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" />{tmdbKey ? 'TMDB' : 'Українське кіно'}
-                  </span>
-                  <span className="flex items-center gap-1 bg-black/40 px-3 py-1.5 rounded-full border border-kino-yellow-400/30">
+                  {currentHero.rating >= 7.5 && (
+                    <span className="bg-kino-yellow-500/20 backdrop-blur-sm border border-kino-yellow-500/30 text-kino-yellow-400 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                      TOP RATED
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
                     <Star className="w-4 h-4 text-kino-yellow-400 fill-kino-yellow-400" />
-                    <span className="font-bold text-kino-yellow-400">{currentHero.rating}</span>
+                    <span className="font-bold text-white">{currentHero.rating}</span>
                   </span>
                   {currentHero.hasVoiceover && (
-                    <span className="bg-blue-500/20 border border-blue-500/30 text-blue-400 px-3 py-1.5 rounded-full text-xs font-bold uppercase flex items-center gap-1">
-                      <Volume2 className="w-3 h-3" />UA озвучка
+                    <span className="bg-ukr-blue/20 backdrop-blur-sm border border-ukr-blue/30 text-ukr-blue px-3 py-1.5 rounded-full text-xs font-bold uppercase flex items-center gap-1.5">
+                      <Volume2 className="w-3 h-3" />UA
+                    </span>
+                  )}
+                  <span className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium text-gray-300">
+                    {currentHero.year}
+                  </span>
+                </div>
+
+                {/* Title - Large Typography */}
+                <div>
+                  <h1 className="text-5xl md:text-8xl font-bold leading-[0.9] tracking-tight text-white drop-shadow-2xl">
+                    {currentHero.title}
+                  </h1>
+                  <p className="text-gray-400 text-base md:text-xl mt-3 font-light">
+                    {currentHero.titleEn}
+                  </p>
+                </div>
+
+                {/* Meta info */}
+                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
+                  {currentHero.duration && (
+                    <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" />{currentHero.duration}</span>
+                  )}
+                  {currentHero.genre.length > 0 && (
+                    <span className="flex items-center gap-2">
+                      {currentHero.genre.slice(0, 3).map((g, i) => (
+                        <span key={g} className="flex items-center gap-2">
+                          {i > 0 && <span className="w-1 h-1 bg-gray-600 rounded-full" />}
+                          {g}
+                        </span>
+                      ))}
                     </span>
                   )}
                 </div>
 
-                <div>
-                  <h1 className="text-4xl md:text-7xl font-black font-bebas mb-2 leading-none">
-                    <span className="gradient-text drop-shadow-2xl">{currentHero.title}</span>
-                  </h1>
-                  <p className="text-gray-400 text-sm md:text-xl font-light">
-                    {currentHero.titleEn} - {currentHero.year}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3 text-xs md:text-sm text-gray-300">
-                  {currentHero.duration && (
-                    <span className="flex items-center gap-1"><Clock className="w-4 h-4" />{currentHero.duration}</span>
-                  )}
-                  {currentHero.genre.length > 0 && <><span>-</span><span>{currentHero.genre.join(', ')}</span></>}
-                </div>
-
-                <p className="text-gray-300 text-sm md:text-lg leading-relaxed max-w-xl line-clamp-3">
+                {/* Description */}
+                <p className="text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-2">
                   {currentHero.description}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-3 pt-2">
+                {/* Premium Action Buttons */}
+                <div className="flex flex-wrap items-center gap-3 pt-4">
                   <button onClick={() => playMovie(currentHero)}
-                    className="group flex items-center gap-2 bg-gradient-to-r from-kino-yellow-400 to-kino-yellow-500 text-black px-6 md:px-8 py-3 md:py-4 rounded-lg font-bold hover:scale-105 transition-all shadow-2xl hover:shadow-kino-yellow-500/50 text-sm md:text-base">
-                    <Play className="w-5 h-5 fill-black group-hover:scale-110 transition-transform" />Дивитись
+                    className="group flex items-center gap-3 bg-ukr-blue hover:bg-ukr-blue-light text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-ukr-blue/30 hover:shadow-ukr-blue/50 hover:scale-[1.02]">
+                    <Play className="w-5 h-5 fill-white" />
+                    ДИВИТИСЯ
                   </button>
                   <button onClick={() => openMovie(currentHero)}
-                    className="flex items-center gap-2 glass border px-6 md:px-8 py-3 md:py-4 rounded-lg font-bold hover:bg-white/20 transition-all text-sm md:text-base">
-                    <Info className="w-5 h-5" />Детальніше
+                    className="flex items-center gap-3 glass border border-white/20 hover:bg-white/20 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02]">
+                    <Info className="w-5 h-5" />
+                    ІНФО
                   </button>
                   <button onClick={() => toggleFavorite(currentHero.id)}
-                    className={`p-3 md:p-4 rounded-lg border transition-all ${
+                    className={`p-4 rounded-xl transition-all duration-300 hover:scale-110 ${
                       favorites.includes(currentHero.id)
-                        ? 'bg-red-500/20 border-red-500/30 text-red-400'
+                        ? 'bg-red-500/20 text-red-400 ring-2 ring-red-500/30'
                         : 'glass hover:bg-white/20'
                     }`}>
                     <Heart className={`w-5 h-5 ${favorites.includes(currentHero.id) ? 'fill-red-400' : ''}`} />
@@ -444,20 +487,22 @@ export default function HomePage() {
             </div>
           </div>
 
-          <button onClick={prevSlide} className="absolute left-4 top-1/2 -translate-y-1/2 glass border p-3 md:p-4 rounded-full hover:bg-black/60 transition-all group z-10">
-            <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          {/* Navigation Arrows */}
+          <button onClick={prevSlide} className="absolute left-6 top-1/2 -translate-y-1/2 glass p-4 rounded-full hover:bg-white/20 transition-all group z-10 opacity-0 hover:opacity-100 focus:opacity-100">
+            <ChevronLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
           </button>
-          <button onClick={nextSlide} className="absolute right-4 top-1/2 -translate-y-1/2 glass border p-3 md:p-4 rounded-full hover:bg-black/60 transition-all group z-10">
-            <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          <button onClick={nextSlide} className="absolute right-6 top-1/2 -translate-y-1/2 glass p-4 rounded-full hover:bg-white/20 transition-all group z-10 opacity-0 hover:opacity-100 focus:opacity-100">
+            <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
           </button>
 
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+          {/* Slide Indicators */}
+          <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
             {heroMovies.map((_, i) => (
               <button key={i} onClick={() => setCurrentSlide(i)}
-                className={`transition-all rounded-full ${
+                className={`transition-all duration-300 rounded-full ${
                   i === currentSlide
-                    ? 'bg-kino-yellow-400 w-10 h-1.5 shadow-lg shadow-kino-yellow-400/50'
-                    : 'bg-white/30 w-6 h-1.5 hover:bg-white/50'
+                    ? 'bg-ukr-blue w-8 h-2'
+                    : 'bg-white/30 w-2 h-2 hover:bg-white/50'
                 }`} />
             ))}
           </div>
@@ -467,52 +512,65 @@ export default function HomePage() {
       {/* Continue Watching */}
       <ContinueWatching />
 
-      {/* Filters */}
-      <div className="bg-gradient-to-b from-black to-kino-dark-900 border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
-          <div className="flex flex-wrap items-center gap-3">
+      {/* Quick Filter Tags - Apple TV style category bubbles */}
+      <div className="bg-black py-6 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {QUICK_FILTERS.map(filter => (
+              <button
+                key={filter.name}
+                onClick={() => filter.genre ? setSelectedGenre(selectedGenre === filter.genre ? 'all' : filter.genre) : null}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-all duration-300 ${
+                  selectedGenre === filter.genre
+                    ? filter.color + ' scale-105'
+                    : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                {filter.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
-            {activeCategory !== 'Мій список' && activeCategory !== 'Переглянуті' && (
+      {/* Filters Bar - Minimal */}
+      <div className="bg-black/50 backdrop-blur-sm sticky top-[72px] z-30 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {activeCategory !== 'МІЙ СПИСОК' && (
               <button onClick={toggleVoiceoverOnly}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all border text-sm ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                   voiceoverOnly
-                    ? 'bg-blue-500/20 border-blue-500/30 text-blue-400'
-                    : 'glass border-white/20 text-gray-400 hover:bg-white/20'
+                    ? 'bg-ukr-blue/20 text-ukr-blue ring-1 ring-ukr-blue/30'
+                    : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
                 }`}>
-                {voiceoverOnly ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                <Volume2 className="w-4 h-4" />
                 UA озвучка
               </button>
             )}
 
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-gray-400" />
-              <select value={selectedGenre} onChange={e => setSelectedGenre(e.target.value)}
-                className="glass border border-white/20 text-white px-3 py-2 rounded-lg text-sm cursor-pointer hover:bg-white/20 transition-colors">
-                <option value="all">Всі жанри</option>
-                {genres.slice(1).map(g => <option key={g} value={g}>{g}</option>)}
-              </select>
-            </div>
+            <select value={selectedGenre} onChange={e => setSelectedGenre(e.target.value)}
+              className="bg-white/5 border-0 text-white px-4 py-2 rounded-xl text-sm cursor-pointer hover:bg-white/10 transition-colors focus:ring-2 focus:ring-ukr-blue/50 outline-none">
+              <option value="all">Всі жанри</option>
+              {genres.slice(1).map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
 
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="w-4 h-4 text-gray-400" />
-              <select value={sortBy} onChange={e => setSortBy(e.target.value as any)}
-                className="glass border border-white/20 text-white px-3 py-2 rounded-lg text-sm cursor-pointer hover:bg-white/20 transition-colors">
-                <option value="rating">За рейтингом</option>
-                <option value="year">За роком</option>
-                <option value="title">За назвою</option>
-                <option value="trending">За популярністю</option>
-                <option value="myrating">Моя оцінка</option>
-              </select>
-            </div>
+            <select value={sortBy} onChange={e => setSortBy(e.target.value as any)}
+              className="bg-white/5 border-0 text-white px-4 py-2 rounded-xl text-sm cursor-pointer hover:bg-white/10 transition-colors focus:ring-2 focus:ring-ukr-blue/50 outline-none">
+              <option value="rating">За рейтингом</option>
+              <option value="year">За роком</option>
+              <option value="title">За назвою</option>
+              <option value="trending">За популярністю</option>
+            </select>
 
-            <div className="text-sm text-gray-400 ml-auto flex items-center gap-2">
-              {isFetchingMovies && <RefreshCw className="w-4 h-4 animate-spin text-kino-yellow-400" />}
-              <span>Знайдено: <span className="font-bold text-kino-yellow-400">{filteredMovies.length}</span></span>
+            <div className="text-sm text-gray-500 ml-auto flex items-center gap-3">
+              {isFetchingMovies && <RefreshCw className="w-4 h-4 animate-spin text-ukr-blue" />}
+              <span><span className="font-semibold text-white">{filteredMovies.length}</span> фільмів</span>
             </div>
 
             {(selectedGenre !== 'all' || sortBy !== 'rating' || searchQuery) && (
               <button onClick={() => { resetFilters(); }}
-                className="text-sm text-gray-400 hover:text-kino-yellow-400 transition-colors flex items-center gap-1">
+                className="text-sm text-gray-400 hover:text-ukr-blue transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-white/5">
                 <X className="w-4 h-4" />Скинути
               </button>
             )}
@@ -520,118 +578,120 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Movies Grid */}
-      <div className="bg-kino-dark-900 min-h-screen py-8 md:py-12">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="mb-6 md:mb-8">
-            <h2 className="text-2xl md:text-3xl font-black font-bebas mb-2 gradient-text">
-              {activeCategory === 'Мій список' ? 'Обране'
-               : activeCategory === 'Переглянуті' ? 'Переглянуті'
-               : activeCategory}
-            </h2>
-            <div className="h-1 w-16 bg-gradient-to-r from-kino-yellow-400 to-kino-yellow-600 rounded-full" />
+      {/* Movies Grid - 6 columns like Apple TV */}
+      <div className="bg-black min-h-screen py-10 md:py-14">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          {/* Section Header */}
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">
+                {activeCategory === 'МІЙ СПИСОК' ? 'Мій список'
+                 : 'Рекомендовано для вас'}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {activeCategory === 'МІЙ СПИСОК' ? 'Ваші збережені фільми' : 'На основі ваших уподобань'}
+              </p>
+            </div>
           </div>
 
           {filteredMovies.length === 0 ? (
-            <div className="text-center py-20">
-              <Film className="w-20 h-20 mx-auto opacity-10 mb-4" />
-              {activeCategory === 'Мій список' ? (
+            <div className="text-center py-24">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-white/5 flex items-center justify-center">
+                <Film className="w-10 h-10 text-gray-600" />
+              </div>
+              {activeCategory === 'МІЙ СПИСОК' ? (
                 <>
-                  <h3 className="text-xl font-bold text-gray-400 mb-2">Список порожній</h3>
-                  <p className="text-gray-500 mb-4">Натисніть на серце на будь-якому фільмі щоб додати</p>
-                  <button onClick={() => setActiveCategory('Головна')}
-                    className="bg-kino-yellow-400 text-black px-6 py-2 rounded-lg font-bold hover:bg-kino-yellow-500 transition-colors">
+                  <h3 className="text-xl font-semibold text-white mb-2">Список порожній</h3>
+                  <p className="text-gray-500 mb-6 max-w-md mx-auto">Натисніть на серце на будь-якому фільмі щоб додати до списку</p>
+                  <button onClick={() => setActiveCategory('ГОЛОВНА')}
+                    className="bg-ukr-blue hover:bg-ukr-blue-light text-white px-6 py-3 rounded-xl font-semibold transition-colors">
                     Переглянути фільми
-                  </button>
-                </>
-              ) : activeCategory === 'Переглянуті' ? (
-                <>
-                  <h3 className="text-xl font-bold text-gray-400 mb-2">Ще нічого не переглядали</h3>
-                  <p className="text-gray-500 mb-4">Почніть дивитись фільми - вони з'являться тут</p>
-                  <button onClick={() => setActiveCategory('Головна')}
-                    className="bg-kino-yellow-400 text-black px-6 py-2 rounded-lg font-bold hover:bg-kino-yellow-500 transition-colors">
-                    До фільмів
                   </button>
                 </>
               ) : (
                 <>
-                  <h3 className="text-xl font-bold text-gray-400 mb-2">Нічого не знайдено</h3>
-                  <p className="text-gray-500 mb-4">Спробуйте змінити фільтри</p>
+                  <h3 className="text-xl font-semibold text-white mb-2">Нічого не знайдено</h3>
+                  <p className="text-gray-500 mb-6">Спробуйте змінити фільтри пошуку</p>
                   <button onClick={() => resetFilters()}
-                    className="bg-kino-yellow-400 text-black px-6 py-2 rounded-lg font-bold hover:bg-kino-yellow-500 transition-colors">
+                    className="bg-ukr-blue hover:bg-ukr-blue-light text-white px-6 py-3 rounded-xl font-semibold transition-colors">
                     Скинути фільтри
                   </button>
                 </>
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
               {filteredMovies.map((movie, idx) => {
                 const myRating = userRatings[movie.id];
                 const cw = continueWatching.find(c => c.movieId === movie.id);
+                const is4K = movie.rating >= 8;
+                const isHD = movie.rating >= 7;
                 return (
                   <div key={movie.id} className="group cursor-pointer animate-fadeIn"
-                    style={{ animationDelay: `${idx * 25}ms` }}
+                    style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                     onClick={() => openMovie(movie)}>
-                    <div className="relative overflow-hidden rounded-xl aspect-[2/3] mb-2.5 border border-gray-800 group-hover:border-kino-yellow-400/50 transition-all duration-300">
-                      <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105"
+                    {/* Movie Poster Card */}
+                    <div className="relative overflow-hidden rounded-xl aspect-[2/3] mb-3 card-hover ring-1 ring-white/10 group-hover:ring-ukr-blue/50">
+                      <div className="absolute inset-0"
                         style={{ background: movie.posterUrl ? 'transparent' : movie.poster }}>
                         {movie.posterUrl
-                          ? <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" loading="lazy" />
-                          : <div className="absolute inset-0 flex items-center justify-center"><Film className="w-14 h-14 text-white/10" /></div>
+                          ? <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                          : <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900"><Film className="w-12 h-12 text-white/10" /></div>
                         }
                       </div>
 
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-3">
-                        <Play className="w-14 h-14 text-white transform scale-90 group-hover:scale-100 transition-transform mb-2" />
-                        <p className="text-xs text-center line-clamp-3 text-gray-300">{movie.description}</p>
+                      {/* Hover Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                        <div className="bg-ukr-blue/90 backdrop-blur-sm p-4 rounded-full transform scale-75 group-hover:scale-100 transition-transform duration-300 shadow-xl">
+                          <Play className="w-8 h-8 text-white fill-white" />
+                        </div>
                       </div>
 
-                      <div className="absolute top-2 left-2 bg-black/80 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1 border border-kino-yellow-400/20">
-                        <Star className="w-3 h-3 text-kino-yellow-400 fill-kino-yellow-400" />
-                        <span className="text-xs font-bold text-white">{movie.rating}</span>
+                      {/* Quality Badge - 4K or HD */}
+                      {(is4K || isHD) && (
+                        <div className={`absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold ${
+                          is4K ? 'bg-ukr-blue text-white' : 'bg-white/20 backdrop-blur-sm text-white'
+                        }`}>
+                          {is4K ? '4K' : 'HD'}
+                        </div>
+                      )}
+
+                      {/* Rating Badge */}
+                      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                        <div className="flex items-center gap-1 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg">
+                          <Star className="w-3 h-3 text-kino-yellow-400 fill-kino-yellow-400" />
+                          <span className="text-xs font-bold text-white">{movie.rating}</span>
+                        </div>
+                        {movie.hasVoiceover && (
+                          <div className="bg-ukr-blue/80 backdrop-blur-sm px-2 py-1 rounded-lg">
+                            <span className="text-[10px] font-bold text-white">UA</span>
+                          </div>
+                        )}
                       </div>
 
-                      {myRating && (
-                        <div className="absolute top-2 left-14 bg-purple-600/80 backdrop-blur-sm px-2 py-1 rounded-md">
-                          <span className="text-xs font-bold text-white">{'*'.repeat(myRating)}</span>
-                        </div>
-                      )}
-
-                      <button onClick={e => { e.stopPropagation(); toggleFavorite(movie.id); }}
-                        className="absolute top-2 right-2 p-1.5 bg-black/80 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 border border-white/20">
-                        <Heart className={`w-4 h-4 ${favorites.includes(movie.id) ? 'fill-red-400 text-red-400' : 'text-white'}`} />
-                      </button>
-
-                      {movie.hasVoiceover && (
-                        <div className="absolute bottom-2 left-2 bg-blue-500/80 backdrop-blur-sm px-1.5 py-0.5 rounded flex items-center gap-1">
-                          <Volume2 className="w-3 h-3 text-white" />
-                          <span className="text-xs font-bold text-white">UA</span>
-                        </div>
-                      )}
-
-                      {movie.isTrending && (
-                        <div className="absolute bottom-2 right-2 bg-kino-yellow-500/80 backdrop-blur-sm px-1.5 py-0.5 rounded flex items-center gap-1">
-                          <TrendingUp className="w-3 h-3 text-black" />
-                          <span className="text-xs font-bold text-black">TOP</span>
-                        </div>
-                      )}
-
+                      {/* Progress bar for continue watching */}
                       {cw && cw.progress > 0 && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700/80">
-                          <div className="h-full bg-kino-yellow-400" style={{ width: `${cw.progress}%` }} />
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/50">
+                          <div className="h-full bg-ukr-blue" style={{ width: `${cw.progress}%` }} />
                         </div>
                       )}
+
+                      {/* Favorite button */}
+                      <button onClick={e => { e.stopPropagation(); toggleFavorite(movie.id); }}
+                        className="absolute top-2 left-2 p-2 bg-black/60 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-black/80">
+                        <Heart className={`w-4 h-4 transition-colors ${favorites.includes(movie.id) ? 'fill-red-500 text-red-500' : 'text-white/80'}`} />
+                      </button>
                     </div>
 
-                    <div>
-                      <h3 className="font-bold text-sm text-white line-clamp-1 group-hover:text-kino-yellow-400 transition-colors">
+                    {/* Movie Info */}
+                    <div className="space-y-1">
+                      <h3 className="font-semibold text-sm text-white line-clamp-1 group-hover:text-ukr-blue transition-colors">
                         {movie.title}
                       </h3>
-                      <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
-                        {movie.year > 0 && <span>{movie.year}</span>}
-                        {movie.genre[0] && <><span>-</span><span>{movie.genre[0]}</span></>}
-                      </div>
+                      <p className="text-xs text-gray-500">
+                        {movie.year > 0 && movie.year}
+                        {movie.genre[0] && ` - ${movie.genre[0]}`}
+                      </p>
                     </div>
                   </div>
                 );
@@ -641,31 +701,31 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Movie Modal */}
+      {/* Movie Modal - Premium Design */}
       {selectedMovie && (() => {
         const m = detailsOf(selectedMovie);
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-kino-dark-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-800 shadow-2xl animate-scaleIn">
-              <div className="relative h-64 md:h-80 overflow-hidden rounded-t-2xl">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl animate-fadeIn">
+            <div className="glass-heavy rounded-3xl max-w-5xl w-full max-h-[92vh] overflow-y-auto shadow-2xl animate-scaleIn">
+              {/* Modal Header with Backdrop */}
+              <div className="relative h-72 md:h-96 overflow-hidden rounded-t-3xl">
                 <div className="absolute inset-0"
                   style={{ background: m.backdropUrl ? 'transparent' : m.backdrop }}>
-                  {m.backdropUrl
-                    ? <img src={m.backdropUrl} alt="" className="w-full h-full object-cover" />
-                    : null}
-                  <div className="absolute inset-0 bg-gradient-to-t from-kino-dark-800 via-kino-dark-800/50 to-transparent" />
+                  {m.backdropUrl && <img src={m.backdropUrl} alt="" className="w-full h-full object-cover" />}
+                  <div className="absolute inset-0 bg-gradient-to-t from-kino-dark-800 via-black/60 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
                 </div>
                 <button onClick={() => { setSelectedMovie(null); setIsPlaying(false); }}
-                  className="absolute top-4 right-4 p-2 bg-black/60 backdrop-blur-sm rounded-full hover:bg-black/80 transition-colors border border-white/20">
-                  <X className="w-6 h-6" />
+                  className="absolute top-5 right-5 p-3 bg-black/50 backdrop-blur-sm rounded-xl hover:bg-black/70 transition-all">
+                  <X className="w-5 h-5" />
                 </button>
-                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-                  <h2 className="text-3xl md:text-5xl font-black font-bebas mb-1 gradient-text">{m.title}</h2>
-                  <p className="text-gray-300">{m.titleEn}</p>
+                <div className="absolute bottom-0 left-0 right-0 p-8 md:p-10">
+                  <h2 className="text-4xl md:text-6xl font-bold mb-2 text-white">{m.title}</h2>
+                  <p className="text-gray-400 text-lg">{m.titleEn}</p>
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 space-y-6">
+              <div className="p-8 md:p-10 space-y-8">
                 {isPlaying ? (
                   <div className="space-y-4">
                     {m.tmdbId ? (
@@ -675,22 +735,17 @@ export default function HomePage() {
                         onClose={() => setIsPlaying(false)}
                       />
                     ) : (
-                      <div className="aspect-video bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border border-gray-700 flex items-center justify-center">
+                      <div className="aspect-video bg-gradient-to-br from-gray-900 to-black rounded-2xl flex items-center justify-center ring-1 ring-white/10">
                         <div className="text-center space-y-4 p-8">
-                          <div className="relative">
-                            <div className="absolute inset-0 bg-kino-yellow-400/20 rounded-full blur-xl animate-pulse" />
-                            <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-full border border-gray-700">
-                              <Film className="w-12 h-12 text-kino-yellow-400" />
-                            </div>
+                          <div className="w-20 h-20 mx-auto rounded-2xl bg-ukr-blue/20 flex items-center justify-center">
+                            <Film className="w-10 h-10 text-ukr-blue" />
                           </div>
                           <div>
                             <p className="text-lg font-semibold text-white">Відео недоступне</p>
-                            <p className="text-sm text-gray-400 mt-1">Фільм не має TMDB ID для відтворення</p>
+                            <p className="text-sm text-gray-500 mt-1">Цей фільм ще не доступний для перегляду</p>
                           </div>
-                          <button 
-                            onClick={() => setIsPlaying(false)}
-                            className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-sm transition-colors"
-                          >
+                          <button onClick={() => setIsPlaying(false)}
+                            className="bg-white/10 hover:bg-white/15 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-colors">
                             Закрити
                           </button>
                         </div>
@@ -699,15 +754,15 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <button onClick={() => setIsPlaying(true)}
-                    className="w-full aspect-video bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-gray-700 flex items-center justify-center group hover:border-kino-yellow-400/50 transition-all">
+                    className="w-full aspect-video bg-gradient-to-br from-gray-900/50 to-black rounded-2xl ring-1 ring-white/10 flex items-center justify-center group hover:ring-ukr-blue/50 transition-all">
                     <div className="text-center">
-                      <div className="bg-kino-yellow-400 p-6 rounded-full mb-3 group-hover:scale-110 transition-transform shadow-lg shadow-kino-yellow-500/50">
-                        <Play className="w-12 h-12 text-black fill-black" />
+                      <div className="bg-ukr-blue p-5 rounded-2xl mb-4 group-hover:scale-110 transition-transform shadow-xl shadow-ukr-blue/30">
+                        <Play className="w-10 h-10 text-white fill-white" />
                       </div>
-                      <p className="text-xl font-bold">Дивитись фільм</p>
-                      {m.duration && <p className="text-sm text-gray-400 mt-1">{m.duration}</p>}
+                      <p className="text-xl font-semibold">Дивитись</p>
+                      {m.duration && <p className="text-sm text-gray-500 mt-1">{m.duration}</p>}
                       {continueWatching.find(c => c.movieId === m.id) && (
-                        <p className="text-xs text-kino-yellow-400 mt-1">
+                        <p className="text-xs text-ukr-blue mt-2">
                           Продовжити з {continueWatching.find(c => c.movieId === m.id)?.progress}%
                         </p>
                       )}
@@ -715,36 +770,37 @@ export default function HomePage() {
                   </button>
                 )}
 
-                <div className="flex flex-wrap items-center gap-3 text-sm">
-                  <div className="flex items-center gap-2 bg-kino-yellow-500/20 border border-kino-yellow-500/30 px-3 py-1.5 rounded-lg">
+                {/* Movie Meta Info */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-2 bg-kino-yellow-500/20 px-4 py-2 rounded-xl">
                     <Star className="w-4 h-4 text-kino-yellow-400 fill-kino-yellow-400" />
-                    <span className="font-bold text-kino-yellow-400">{m.rating}</span>
+                    <span className="font-semibold text-kino-yellow-400">{m.rating}</span>
                   </div>
                   {m.year > 0 && (
-                    <div className="flex items-center gap-2 text-gray-300">
+                    <div className="flex items-center gap-2 text-gray-400 bg-white/5 px-4 py-2 rounded-xl">
                       <Calendar className="w-4 h-4" />{m.year}
                     </div>
                   )}
                   {m.duration && (
-                    <div className="flex items-center gap-2 text-gray-300">
+                    <div className="flex items-center gap-2 text-gray-400 bg-white/5 px-4 py-2 rounded-xl">
                       <Clock className="w-4 h-4" />{m.duration}
                     </div>
                   )}
                   {(m.hasVoiceover || (m.tmdbId && dubbingCache[m.tmdbId])) && (
-                    <div className="flex items-center gap-2 bg-blue-500/20 border border-blue-500/30 px-3 py-1.5 rounded-lg text-blue-400">
+                    <div className="flex items-center gap-2 bg-ukr-blue/20 px-4 py-2 rounded-xl text-ukr-blue">
                       <Volume2 className="w-4 h-4" />
-                      {dubbingCache[m.tmdbId || 0]?.studio || 'UA озвучка'}
+                      <span className="font-medium">{dubbingCache[m.tmdbId || 0]?.studio || 'UA озвучка'}</span>
                     </div>
                   )}
                 </div>
 
                 {m.genre.length > 0 && (
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Жанри</h3>
+                    <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Жанри</h4>
                     <div className="flex flex-wrap gap-2">
                       {m.genre.map(g => (
                         <button key={g} onClick={() => { setSelectedGenre(g); setSelectedMovie(null); }}
-                          className="bg-white/10 hover:bg-kino-yellow-400/20 hover:text-kino-yellow-400 px-3 py-1 rounded-full text-sm text-gray-300 border border-white/20 hover:border-kino-yellow-400/30 transition-all">
+                          className="bg-white/8 hover:bg-ukr-blue/20 hover:text-ukr-blue px-4 py-2 rounded-xl text-sm text-gray-300 transition-all">
                           {g}
                         </button>
                       ))}
@@ -754,8 +810,8 @@ export default function HomePage() {
 
                 {m.description && (
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Опис</h3>
-                    <p className="text-gray-300 leading-relaxed">{m.description}</p>
+                    <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Опис</h4>
+                    <p className="text-gray-300 leading-relaxed text-[15px]">{m.description}</p>
                   </div>
                 )}
 
@@ -816,23 +872,24 @@ export default function HomePage() {
                   <RelatedMovies movie={selectedMovie} />
                 </div>
 
-                <div className="flex flex-wrap gap-3 pt-2 border-t border-gray-800">
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-3 pt-6 border-t border-white/5">
                   <button onClick={() => toggleFavorite(m.id)}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all border ${
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
                       favorites.includes(m.id)
-                        ? 'bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30'
-                        : 'glass border-white/20 text-white hover:bg-white/20'
+                        ? 'bg-red-500/20 text-red-400 ring-1 ring-red-500/30'
+                        : 'bg-white/8 text-white hover:bg-white/12'
                     }`}>
                     <Heart className={`w-5 h-5 ${favorites.includes(m.id) ? 'fill-red-400' : ''}`} />
-                    {favorites.includes(m.id) ? 'В обраному' : 'До обраного'}
+                    {favorites.includes(m.id) ? 'В обраному' : 'До списку'}
                   </button>
                   <button onClick={() => handleShare(selectedMovie)}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all border ${
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
                       shareSuccess
-                        ? 'bg-green-500/20 border-green-500/30 text-green-400'
-                        : 'glass border-white/20 text-white hover:bg-white/20'
+                        ? 'bg-green-500/20 text-green-400'
+                        : 'bg-white/8 text-white hover:bg-white/12'
                     }`}>
-                    {shareSuccess ? <><CheckCircle className="w-5 h-5" />Скопійовано!</> : <><Share2 className="w-5 h-5" />Поділитися</>}
+                    {shareSuccess ? <><CheckCircle className="w-5 h-5" />Скопійовано</> : <><Share2 className="w-5 h-5" />Поділитися</>}
                   </button>
                 </div>
               </div>
@@ -846,8 +903,8 @@ export default function HomePage() {
 
       {scrolled && (
         <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-8 right-8 p-4 bg-kino-yellow-400 text-black rounded-full shadow-2xl hover:scale-110 transition-all z-40 border-2 border-kino-yellow-500 animate-fadeIn">
-          <ChevronDown className="w-6 h-6 rotate-180" />
+          className="fixed bottom-8 right-8 p-4 bg-ukr-blue text-white rounded-2xl shadow-xl shadow-ukr-blue/30 hover:scale-110 transition-all z-40 animate-fadeIn">
+          <ChevronDown className="w-5 h-5 rotate-180" />
         </button>
       )}
     </div>

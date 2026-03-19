@@ -8,6 +8,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // New UKRFLIX color palette - vibrant blue focus
+        'ukr': {
+          blue: '#3B82F6',
+          'blue-light': '#60A5FA',
+          'blue-dark': '#2563EB',
+          accent: '#06B6D4',
+        },
+        // Keep old for backward compatibility
         'kino-yellow': {
           400: '#fbbf24',
           500: '#f59e0b',
@@ -15,8 +23,9 @@ module.exports = {
         },
         'kino-dark': {
           900: '#0a0a0a',
-          800: '#1a1a1a',
-          700: '#2a2a2a',
+          800: '#111111',
+          700: '#1a1a1a',
+          600: '#222222',
         }
       },
       animation: {
