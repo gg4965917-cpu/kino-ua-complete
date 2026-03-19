@@ -50,3 +50,38 @@ CREATE POLICY "Allow public read access to movies" ON movies
 
 CREATE POLICY "Allow public read access to dubbing" ON dubbing
   FOR SELECT USING (true);
+
+-- Create AI dubbing queue for automatic search
+CREATE TABLE IF NOT EXISTS ai_dubbing_queue (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tmdb_id INTEGER NOT NULL,
+  title TEXT NOT NULL,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
+  result JSONB,
+  error TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  processed_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_queue_status ON ai_dubbing_queue(status);
+
+ALTER TABLE ai_dubbing_queue ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read access to ai_queue" ON ai_dubbing_queue
+  FOR SELECT USING (true);
+
+-- Allow inserts for the API
+CREATE POLICY "Allow public insert to movies" ON movies
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow public update to movies" ON movies
+  FOR UPDATE USING (true);
+
+CREATE POLICY "Allow public insert to dubbing" ON dubbing
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow public insert to ai_queue" ON ai_dubbing_queue
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow public update to ai_queue" ON ai_dubbing_queue
+  FOR UPDATE USING (true);
