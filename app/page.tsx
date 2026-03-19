@@ -5,7 +5,7 @@ import {
   Search, Film, Star, Play, Info, ChevronLeft, ChevronRight,
   TrendingUp, X, Heart, Filter, SlidersHorizontal, Clock,
   Calendar, Volume2, VolumeX, Share2, ChevronDown, Menu,
-  Sparkles, CheckCircle, Settings, RefreshCw, Tv,
+  Sparkles, CheckCircle, RefreshCw, Tv,
 } from 'lucide-react';
 import { useMovieStore } from '@/lib/store';
 import {
@@ -17,6 +17,7 @@ import { MovieCardSkeleton } from '@/components/Skeleton';
 import ContinueWatching from '@/components/ContinueWatching';
 import UserRating from '@/components/UserRating';
 import RelatedMovies from '@/components/RelatedMovies';
+import { getDubbingInfo, DubbingInfo } from '@/lib/dubbing';
 
 const CATEGORIES = [
   { name: 'Головна',    icon: Film      },
@@ -57,6 +58,7 @@ export default function HomePage() {
 
 
   const [movieDetailsCache, setMovieDetailsCache] = useState<Record<number, Partial<Movie>>>({});
+  const [dubbingCache, setDubbingCache] = useState<Record<number, DubbingInfo | null>>({});
 
   const movies = allMovies.length > 0 ? allMovies : staticMovies;
 
@@ -180,10 +182,17 @@ export default function HomePage() {
     ).slice(0, 5);
   }, [searchQuery, movies]);
 
+  const loadDubbing = useCallback(async (tmdbId: number) => {
+    if (dubbingCache[tmdbId] !== undefined) return;
+    const info = await getDubbingInfo(tmdbId);
+    setDubbingCache(prev => ({ ...prev, [tmdbId]: info }));
+  }, [dubbingCache]);
+
   const openMovie = (movie: Movie) => {
     setSelectedMovie(movie);
     addToHistory(movie.id);
     loadMovieDetails(movie);
+    if (movie.tmdbId) loadDubbing(movie.tmdbId);
   };
   const playMovie = (movie: Movie) => {
     setSelectedMovie(movie);
@@ -707,9 +716,10 @@ export default function HomePage() {
                       <Clock className="w-4 h-4" />{m.duration}
                     </div>
                   )}
-                  {m.hasVoiceover && (
+                  {(m.hasVoiceover || (m.tmdbId && dubbingCache[m.tmdbId])) && (
                     <div className="flex items-center gap-2 bg-blue-500/20 border border-blue-500/30 px-3 py-1.5 rounded-lg text-blue-400">
-                      <Volume2 className="w-4 h-4" />UA озвучка
+                      <Volume2 className="w-4 h-4" />
+                      {dubbingCache[m.tmdbId || 0]?.studio || 'UA озвучка'}
                     </div>
                   )}
                 </div>
@@ -749,6 +759,35 @@ export default function HomePage() {
                         <p className="text-gray-300 text-sm">{m.cast.join(', ')}</p>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {m.tmdbId && dubbingCache[m.tmdbId] && (
+                  <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-4">
+                    <h3 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <Volume2 className="w-4 h-4" />Український дубляж
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <span className="text-gray-500">Студія:</span>
+                        <p className="text-white font-medium">{dubbingCache[m.tmdbId].studio}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Якість:</span>
+                        <p className="text-white font-medium">{dubbingCache[m.tmdbId].quality}</p>
+                      </div>
+                      {dubbingCache[m.tmdbId].voice_actors && (
+                        <div className="col-span-2">
+                          <span className="text-gray-500">Актори озвучки:</span>
+                          <p className="text-white font-medium">{dubbingCache[m.tmdbId].voice_actors}</p>
+                        </div>
+                      )}
+                      <div className="col-span-2 flex items-center gap-2">
+                        {dubbingCache[m.tmdbId].has_subtitles && (
+                          <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs">Субтитри</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
 
