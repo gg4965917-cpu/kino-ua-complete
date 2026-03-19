@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
 // Get all movies that have Ukrainian dubbing
 export async function GET(req: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await createServiceClient();
     const { searchParams } = new URL(req.url);
     
     const limit = parseInt(searchParams.get('limit') || '50');

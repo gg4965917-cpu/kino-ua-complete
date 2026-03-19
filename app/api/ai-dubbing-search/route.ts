@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
 import { searchDubbingWithAI } from '@/lib/ai-dubbing';
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    const supabase = await createServiceClient();
 
     // Check if dubbing already exists in database
     const { data: existing } = await supabase
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
 // Get queue status and process pending items
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const supabase = await createServiceClient();
 
     // Get queue statistics
     const { data: stats } = await supabase
