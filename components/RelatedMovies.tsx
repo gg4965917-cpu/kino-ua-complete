@@ -1,8 +1,7 @@
 'use client';
 
 import { Film, Star, Play } from 'lucide-react';
-import { Movie } from '@/lib/movies';
-import { moviesData } from '@/lib/movies';
+import { Movie, staticMovies } from '@/lib/movies';
 import { useMovieStore } from '@/lib/store';
 
 interface RelatedMoviesProps {
@@ -10,9 +9,11 @@ interface RelatedMoviesProps {
 }
 
 export default function RelatedMovies({ movie }: RelatedMoviesProps) {
-  const { setSelectedMovie, addToHistory, setIsPlaying } = useMovieStore();
+  const { setSelectedMovie, addToHistory, setIsPlaying, allMovies } = useMovieStore();
 
-  const related = moviesData
+  const movies = allMovies.length > 0 ? allMovies : staticMovies;
+  
+  const related = movies
     .filter(m => m.id !== movie.id && m.genre.some(g => movie.genre.includes(g)))
     .sort((a, b) => {
       const aShared = a.genre.filter(g => movie.genre.includes(g)).length;
@@ -42,14 +43,28 @@ export default function RelatedMovies({ movie }: RelatedMoviesProps) {
           >
             <div
               className="relative overflow-hidden rounded-lg aspect-[2/3] mb-2 border border-gray-800 group-hover:border-kino-yellow-400/50 transition-all duration-300"
-              style={{ background: m.poster || m.backdrop }}
+              style={{ background: m.posterUrl ? 'transparent' : (m.poster || m.backdrop) }}
             >
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Film className="w-8 h-8 text-white/10" />
-              </div>
+              {/* Poster image */}
+              {m.posterUrl ? (
+                <img 
+                  src={m.posterUrl} 
+                  alt={m.title} 
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Film className="w-8 h-8 text-white/10" />
+                </div>
+              )}
+              
+              {/* Hover overlay */}
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Play className="w-8 h-8 text-white" />
               </div>
+              
+              {/* Rating badge */}
               <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur-sm px-1.5 py-0.5 rounded flex items-center space-x-0.5">
                 <Star className="w-2.5 h-2.5 text-kino-yellow-400 fill-kino-yellow-400" />
                 <span className="text-xs font-bold text-white">{m.rating}</span>

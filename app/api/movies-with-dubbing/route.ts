@@ -4,6 +4,11 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET() {
   try {
     const supabase = await createClient();
+    
+    // Check if Supabase is configured
+    if (!supabase) {
+      return NextResponse.json({ movies: [], message: 'Database not configured' });
+    }
 
     // Fetch movies with their dubbing information
     const { data: movies, error } = await supabase
