@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { X, Play, Heart, Star, Clock, Calendar, Volume2, Users, Film } from 'lucide-react';
+import { X, Play, Heart, Star, Clock, Calendar, Volume2, Users, Film, Languages, Award } from 'lucide-react';
 import Image from 'next/image';
 import { Movie } from '@/lib/movies';
 import { useMovieStore } from '@/lib/store';
@@ -15,6 +15,7 @@ interface MovieModalProps {
     quality?: string;
     hasSubtitles?: boolean;
     voiceActors?: string;
+    title_uk?: string;
   } | null;
 }
 
@@ -173,34 +174,46 @@ export default function MovieModal({ movie, onClose, onPlay, dubbingInfo }: Movi
           </div>
 
           {/* Dubbing Info */}
-          {dubbingInfo && (
-            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 mb-6">
+          {(dubbingInfo || movie.hasVoiceover) && (
+            <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 mb-6">
               <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                <Volume2 className="w-5 h-5 text-primary" />
-                Інформація про дубляж
+                <Languages className="w-5 h-5 text-primary" />
+                Український дубляж
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                {dubbingInfo.studio && (
-                  <div>
-                    <span className="text-muted-foreground block mb-1">Студія</span>
-                    <span className="font-medium">{dubbingInfo.studio}</span>
+                {dubbingInfo?.studio && (
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground mb-1 flex items-center gap-1">
+                      <Award className="w-3 h-3" />
+                      Студія
+                    </span>
+                    <span className="font-medium text-primary">{dubbingInfo.studio}</span>
                   </div>
                 )}
-                {dubbingInfo.quality && (
-                  <div>
-                    <span className="text-muted-foreground block mb-1">Якість</span>
+                {dubbingInfo?.quality && (
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground mb-1">Якість відео</span>
                     <span className="font-medium">{dubbingInfo.quality}</span>
                   </div>
                 )}
-                {dubbingInfo.hasSubtitles !== undefined && (
-                  <div>
-                    <span className="text-muted-foreground block mb-1">Субтитри</span>
-                    <span className="font-medium">{dubbingInfo.hasSubtitles ? 'Так' : 'Ні'}</span>
+                {dubbingInfo?.hasSubtitles !== undefined && (
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground mb-1">Субтитри UA</span>
+                    <span className="font-medium">{dubbingInfo.hasSubtitles ? 'Доступні' : 'Недоступні'}</span>
                   </div>
                 )}
-                {dubbingInfo.voiceActors && (
-                  <div className="col-span-2 md:col-span-1">
-                    <span className="text-muted-foreground block mb-1">Актори озвучки</span>
+                {!dubbingInfo && movie.hasVoiceover && (
+                  <div className="flex flex-col col-span-2">
+                    <span className="text-muted-foreground mb-1">Статус</span>
+                    <span className="font-medium text-primary">Доступний українською</span>
+                  </div>
+                )}
+                {dubbingInfo?.voiceActors && (
+                  <div className="col-span-2 md:col-span-4">
+                    <span className="text-muted-foreground block mb-1 flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      Актори озвучки
+                    </span>
                     <span className="font-medium">{dubbingInfo.voiceActors}</span>
                   </div>
                 )}

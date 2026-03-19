@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Film, X, Menu, TrendingUp, Star, Sparkles, Heart, Tv } from 'lucide-react';
+import { Search, Film, X, Menu, TrendingUp, Star, Sparkles, Heart, Tv, Wand2 } from 'lucide-react';
 import { useMovieStore } from '@/lib/store';
+import AISearchModal from './AISearchModal';
+import { Movie } from '@/lib/movies';
 
 const CATEGORIES = [
   { name: 'Головна', icon: Film },
@@ -13,18 +15,33 @@ const CATEGORIES = [
   { name: 'Мій список', icon: Heart },
 ];
 
-export default function Navbar() {
+interface NavbarProps {
+  onMovieSelect?: (movie: Movie) => void;
+}
+
+export default function Navbar({ onMovieSelect }: NavbarProps) {
   const {
     searchQuery,
     setSearchQuery,
     activeCategory,
     setActiveCategory,
     resetFilters,
+    setSelectedMovie,
   } = useMovieStore();
 
   const [scrolled, setScrolled] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAISearch, setShowAISearch] = useState(false);
+
+  const handleAIMovieSelect = (movie: Movie) => {
+    setShowAISearch(false);
+    if (onMovieSelect) {
+      onMovieSelect(movie);
+    } else {
+      setSelectedMovie(movie);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -89,6 +106,15 @@ export default function Navbar() {
 
           {/* Search & Mobile Menu */}
           <div className="flex items-center gap-3">
+            {/* AI Search Button */}
+            <button
+              onClick={() => setShowAISearch(true)}
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 text-primary rounded-full text-sm font-medium transition-colors border border-primary/30"
+            >
+              <Wand2 className="w-4 h-4" />
+              <span className="hidden md:inline">AI Пошук</span>
+            </button>
+
             {/* Search */}
             <div className="relative">
               <div
@@ -131,6 +157,18 @@ export default function Navbar() {
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="lg:hidden mt-4 pb-4 space-y-2 border-t border-border pt-4 animate-fadeIn">
+            {/* Mobile AI Search */}
+            <button
+              onClick={() => {
+                setShowAISearch(true);
+                setMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-2 w-full p-3 rounded-lg bg-primary/20 text-primary border border-primary/30"
+            >
+              <Wand2 className="w-5 h-5" />
+              <span className="font-medium">AI Пошук з UA дубляжем</span>
+            </button>
+            
             {CATEGORIES.map((cat) => {
               const Icon = cat.icon;
               return (
@@ -154,7 +192,15 @@ export default function Navbar() {
             })}
           </div>
         )}
+        </div>
       </div>
+
+      {/* AI Search Modal */}
+      <AISearchModal
+        isOpen={showAISearch}
+        onClose={() => setShowAISearch(false)}
+        onMovieSelect={handleAIMovieSelect}
+      />
     </nav>
   );
 }
