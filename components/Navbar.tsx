@@ -50,16 +50,11 @@ export default function Navbar({ onMovieSelect }: NavbarProps) {
   }, []);
 
   return (
-    <nav
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled
-          ? 'glass-strong shadow-2xl'
-          : 'bg-gradient-to-b from-background/90 to-transparent'
-      }`}
-    >
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+      scrolled ? 'glass-strong shadow-2xl' : 'bg-gradient-to-b from-background/90 to-transparent'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <div className="flex items-center gap-8">
             <button
               onClick={() => {
@@ -71,12 +66,9 @@ export default function Navbar({ onMovieSelect }: NavbarProps) {
               <div className="bg-primary p-1.5 rounded-lg group-hover:scale-110 group-hover:rotate-6 transition-all shadow-lg shadow-primary/30">
                 <Film className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
               </div>
-              <span className="text-xl font-bold tracking-tight gradient-text">
-                UKRFLIX
-              </span>
+              <span className="text-xl font-bold tracking-tight gradient-text">UKRFLIX</span>
             </button>
 
-            {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-6">
               {CATEGORIES.map((cat) => {
                 const Icon = cat.icon;
@@ -104,9 +96,7 @@ export default function Navbar({ onMovieSelect }: NavbarProps) {
             </div>
           </div>
 
-          {/* Search & Mobile Menu */}
           <div className="flex items-center gap-3">
-            {/* AI Search Button */}
             <button
               onClick={() => setShowAISearch(true)}
               className="hidden sm:flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 text-primary rounded-full text-sm font-medium transition-colors border border-primary/30"
@@ -115,7 +105,6 @@ export default function Navbar({ onMovieSelect }: NavbarProps) {
               <span className="hidden md:inline">AI Пошук</span>
             </button>
 
-            {/* Search */}
             <div className="relative">
               <div
                 className={`flex items-center rounded-full px-3 py-1.5 transition-all border ${
@@ -144,7 +133,6 @@ export default function Navbar({ onMovieSelect }: NavbarProps) {
               </div>
             </div>
 
-            {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 rounded-lg bg-muted/30 hover:bg-muted/50 border border-border"
@@ -154,10 +142,8 @@ export default function Navbar({ onMovieSelect }: NavbarProps) {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="lg:hidden mt-4 pb-4 space-y-2 border-t border-border pt-4 animate-fadeIn">
-            {/* Mobile AI Search */}
             <button
               onClick={() => {
                 setShowAISearch(true);
@@ -166,7 +152,7 @@ export default function Navbar({ onMovieSelect }: NavbarProps) {
               className="flex items-center gap-2 w-full p-3 rounded-lg bg-primary/20 text-primary border border-primary/30"
             >
               <Wand2 className="w-5 h-5" />
-              <span className="font-medium">AI Пошук з UA дубляжем</span>
+              <span className="font-medium">AI Пошук UA</span>
             </button>
 
             {CATEGORIES.map((cat) => {
@@ -194,7 +180,6 @@ export default function Navbar({ onMovieSelect }: NavbarProps) {
         )}
       </div>
 
-      {/* AI Search Modal */}
       <AISearchModal
         isOpen={showAISearch}
         onClose={() => setShowAISearch(false)}
