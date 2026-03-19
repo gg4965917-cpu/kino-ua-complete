@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+// TMDB API configuration
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+
 // This API endpoint searches for Ukrainian dubbing using AI
 // It processes movies and automatically adds dubbing information to the database
 export async function POST(req: NextRequest) {
@@ -27,6 +31,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ data: existing, cached: true });
     }
 
+    // Fetch movie details from TMDB first
+    let movieData: any = null;
+    if (TMDB_API_KEY) {
+      try {
+        const response = await fetch(
+          `${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=en-US`
+        );
+        if (response.ok) {
+          movieData = await response.json();
+        }
+      } catch (e) {
+        console.error('TMDB fetch error:', e);
+      }
+    }
+
     // Add to AI processing queue
     const { data: queueItem, error: queueError } = await supabase
       .from('ai_dubbing_queue')
@@ -48,6 +67,38 @@ export async function POST(req: NextRequest) {
     const result = await simulateAIDubbingSearch(title);
 
     if (result) {
+      // First ensure movie exists in movies table
+      const posterUrl = movieData?.poster_path 
+        ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}`
+        : null;
+      
+      const backdropUrl = movieData?.backdrop_path
+        ? `https://image.tmdb.org/t/p/w1280${movieData.backdrop_path}`
+        : null;
+
+      const { error: movieError } = await supabase
+        .from('movies')
+        .upsert([
+          {
+            tmdb_id: tmdbId,
+            title: movieData?.title || title,
+            title_en: movieData?.original_title || title,
+            description: movieData?.overview || '',
+            rating: movieData?.vote_average || 0,
+            year: movieData?.release_date ? new Date(movieData.release_date).getFullYear() : null,
+            duration: movieData?.runtime ? `${movieData.runtime} min` : null,
+            poster_url: posterUrl,
+            backdrop_url: backdropUrl,
+            genres: movieData?.genres?.map((g: any) => g.name) || [],
+          },
+        ])
+        .select()
+        .single();
+
+      if (movieError && movieError.code !== 'PGRST116') {
+        console.error('Movie insert error:', movieError);
+      }
+
       // Add to dubbing table
       const { data: dubbing, error: dubbingError } = await supabase
         .from('dubbing')
@@ -105,7 +156,6 @@ export async function POST(req: NextRequest) {
 }
 
 // Simulates AI searching for Ukrainian dubbing
-// In production, this would integrate with actual dubbing databases or AI models
 async function simulateAIDubbingSearch(
   title: string
 ): Promise<{

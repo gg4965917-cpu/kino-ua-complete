@@ -172,3 +172,36 @@ export const genres = [
 ];
 
 export const moviesData = staticMovies;
+
+// Fetch movies with dubbing from Supabase
+export async function fetchMoviesWithDubbing() {
+  try {
+    const response = await fetch('/api/movies-with-dubbing');
+    if (!response.ok) return staticMovies;
+    
+    const { movies } = await response.json();
+    if (!movies || movies.length === 0) return staticMovies;
+    
+    return movies.map((m: any) => ({
+      id: m.id,
+      tmdbId: m.tmdb_id,
+      title: m.title,
+      titleEn: m.title_en,
+      description: m.description || '',
+      rating: m.rating || 0,
+      year: m.year || 0,
+      duration: m.duration || '',
+      genre: m.genres || [],
+      posterUrl: m.poster_url,
+      backdropUrl: m.backdrop_url,
+      backdrop: m.backdrop_url ? '' : GRADIENTS[m.tmdb_id % GRADIENTS.length],
+      poster: m.poster_url ? '' : GRADIENTS[m.tmdb_id % GRADIENTS.length],
+      hasVoiceover: true,
+      viewCount: m.view_count || 0,
+      isTrending: m.is_trending || false,
+    }));
+  } catch (error) {
+    console.warn('Error fetching movies from database:', error);
+    return staticMovies;
+  }
+}
