@@ -17,7 +17,7 @@ import { MovieCardSkeleton } from '@/components/Skeleton';
 import ContinueWatching from '@/components/ContinueWatching';
 import UserRating from '@/components/UserRating';
 import RelatedMovies from '@/components/RelatedMovies';
-import { getDubbingByTmdbId, Dubbing } from '@/lib/dubbing';
+import { getDubbingByTmdbId, searchAndAddDubbing, Dubbing } from '@/lib/dubbing';
 
 const CATEGORIES = [
   { name: 'Головна',    icon: Film      },
@@ -182,17 +182,33 @@ export default function HomePage() {
     ).slice(0, 5);
   }, [searchQuery, movies]);
 
-  const loadDubbing = useCallback(async (tmdbId: number) => {
+  const loadDubbing = useCallback(async (tmdbId: number, title?: string) => {
     if (dubbingCache[tmdbId] !== undefined) return;
+    
+    // First try to get existing dubbing
     const info = await getDubbingByTmdbId(tmdbId);
-    setDubbingCache(prev => ({ ...prev, [tmdbId]: info }));
-  }, [dubbingCache]);
+    if (info) {
+      setDubbingCache(prev => ({ ...prev, [tmdbId]: info }));
+      return;
+    }
+    
+    // If not found, try AI search
+    if (title) {
+      const found = await searchAndAddDubbing(tmdbId, title);
+      if (found) {
+        setDubbingCache(prev => ({ ...prev, [tmdbId]: found }));
+        addNotification('✓ Українське дублювання знайдено!', 'success');
+      }
+    }
+    
+    setDubbingCache(prev => ({ ...prev, [tmdbId]: null }));
+  }, [dubbingCache, addNotification]);
 
   const openMovie = (movie: Movie) => {
     setSelectedMovie(movie);
     addToHistory(movie.id);
     loadMovieDetails(movie);
-    if (movie.tmdbId) loadDubbing(movie.tmdbId);
+    if (movie.tmdbId) loadDubbing(movie.tmdbId, movie.title);
   };
   const playMovie = (movie: Movie) => {
     setSelectedMovie(movie);
