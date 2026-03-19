@@ -54,7 +54,7 @@ export default function HomePage() {
   const [isFetchingMovies, setIsFetchingMovies] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
-  const [simulatedProgress, setSimulatedProgress] = useState(0);
+
   const [showSettings, setShowSettings] = useState(false);
   const [tmpKey, setTmpKey] = useState('');
   const [movieDetailsCache, setMovieDetailsCache] = useState<Record<number, Partial<Movie>>>({});
@@ -194,19 +194,7 @@ export default function HomePage() {
     } catch {}
   }, []);
 
-  useEffect(() => {
-    if (!isPlaying || !selectedMovie) return;
-    setSimulatedProgress(0);
-    const t = setInterval(() => {
-      setSimulatedProgress(p => {
-        const n = p + 0.5;
-        updateProgress(selectedMovie.id, Math.round(n));
-        if (n >= 100) { clearInterval(t); return 100; }
-        return n;
-      });
-    }, 500);
-    return () => clearInterval(t);
-  }, [isPlaying, selectedMovie, updateProgress]);
+
 
   const nextSlide = () => setCurrentSlide(p => (p + 1) % heroMovies.length);
   const prevSlide = () => setCurrentSlide(p => (p - 1 + heroMovies.length) % heroMovies.length);
@@ -705,7 +693,7 @@ export default function HomePage() {
                     : null}
                   <div className="absolute inset-0 bg-gradient-to-t from-kino-dark-800 via-kino-dark-800/50 to-transparent" />
                 </div>
-                <button onClick={() => { setSelectedMovie(null); setIsPlaying(false); setSimulatedProgress(0); }}
+                <button onClick={() => { setSelectedMovie(null); setIsPlaying(false); }}
                   className="absolute top-4 right-4 p-2 bg-black/60 backdrop-blur-sm rounded-full hover:bg-black/80 transition-colors border border-white/20">
                   <X className="w-6 h-6" />
                 </button>
@@ -717,17 +705,32 @@ export default function HomePage() {
 
               <div className="p-6 md:p-8 space-y-6">
                 {isPlaying ? (
-                  <div className="aspect-video bg-black rounded-xl overflow-hidden border border-gray-800 flex items-center justify-center">
-                    <div className="text-center space-y-3 w-full px-8">
-                      <Play className="w-16 h-16 text-kino-yellow-400 mx-auto animate-pulse" />
-                      <p className="text-gray-400 text-sm">Відеоплеєр - підключіть VideoCDN / Ashdi API</p>
-                      <div className="w-full bg-gray-800 rounded-full h-2">
-                        <div className="bg-kino-yellow-400 h-2 rounded-full transition-all" style={{ width: `${simulatedProgress}%` }} />
-                      </div>
-                      <p className="text-xs text-gray-600">{Math.round(simulatedProgress)}% переглянуто</p>
+                  <div className="space-y-4">
+                    <div className="aspect-video bg-black rounded-xl overflow-hidden border border-gray-800 relative">
+                      {m.tmdbId ? (
+                        <iframe
+                          src={`https://vidsrc.xyz/embed/movie/${m.tmdbId}`}
+                          className="w-full h-full"
+                          allowFullScreen
+                          allow="autoplay; fullscreen; picture-in-picture"
+                          referrerPolicy="origin"
+                          title={m.title}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="text-center space-y-3">
+                            <Play className="w-16 h-16 text-kino-yellow-400 mx-auto animate-pulse" />
+                            <p className="text-gray-400">Відео недоступне для цього фільму</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-gray-400">Перегляд: {m.title}</p>
                       <button onClick={() => setIsPlaying(false)}
-                        className="bg-kino-yellow-400 text-black px-6 py-2 rounded-lg font-bold hover:bg-kino-yellow-500 transition-colors">
-                        Зупинити
+                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2">
+                        <X className="w-4 h-4" />
+                        Закрити плеєр
                       </button>
                     </div>
                   </div>
