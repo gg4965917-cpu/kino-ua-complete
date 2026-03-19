@@ -17,7 +17,7 @@ import { MovieCardSkeleton } from '@/components/Skeleton';
 import ContinueWatching from '@/components/ContinueWatching';
 import UserRating from '@/components/UserRating';
 import RelatedMovies from '@/components/RelatedMovies';
-import { getDubbingInfo, DubbingInfo } from '@/lib/dubbing';
+import { getDubbingByTmdbId, Dubbing } from '@/lib/dubbing';
 
 const CATEGORIES = [
   { name: 'Головна',    icon: Film      },
@@ -58,7 +58,7 @@ export default function HomePage() {
 
 
   const [movieDetailsCache, setMovieDetailsCache] = useState<Record<number, Partial<Movie>>>({});
-  const [dubbingCache, setDubbingCache] = useState<Record<number, DubbingInfo | null>>({});
+  const [dubbingCache, setDubbingCache] = useState<Record<number, Dubbing | null>>({});
 
   const movies = allMovies.length > 0 ? allMovies : staticMovies;
 
@@ -184,7 +184,7 @@ export default function HomePage() {
 
   const loadDubbing = useCallback(async (tmdbId: number) => {
     if (dubbingCache[tmdbId] !== undefined) return;
-    const info = await getDubbingInfo(tmdbId);
+    const info = await getDubbingByTmdbId(tmdbId);
     setDubbingCache(prev => ({ ...prev, [tmdbId]: info }));
   }, [dubbingCache]);
 
